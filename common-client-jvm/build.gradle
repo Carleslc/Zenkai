@@ -1,0 +1,15 @@
+apply plugin: 'kotlin-platform-jvm'
+
+dependencies {
+    expectedBy project(':common-client')
+    implementation project(':common-jvm')
+
+    implementation dep.kotlin_stdlib_jre8
+    implementation dep.coroutines_jvm
+    implementation dep.retrofit
+
+    testImplementation dep.junit
+    testImplementation dep.kotlin_junit
+}
+
+apply from: '../jvmconfig.gradle'

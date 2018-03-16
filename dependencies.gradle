@@ -1,0 +1,75 @@
+ext {
+    // Common
+    kotlin_extensions_version = '0.7.7'
+
+    // JVM
+    retrofit_version = '2.3.0'
+    coroutines_retrofit_version = '0.8.2'
+    okhttp_version = '3.6.0'
+    gson_version = '2.8.2'
+    junit_version = '4.12'
+
+    // Android
+    android_version = '27.0.2'
+    anko_version = '0.10.4'
+    glide_version = '3.7.0'
+    firebase_version = '11.6.2'
+    activitystarter_version = '1.02'
+    espresso_version = '3.0.1'
+    test_runner_version = '1.0.1'
+    kotlin_preferences_version = '1.51'
+    constraint_layout_version = '1.1.0-beta5'
+    guava_android_version = '23.3-android'
+    multidex_version = '1.0.3'
+
+    dep = [
+            kotlin_stdlib_common       : "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlin_version",
+            kotlin_stdlib_jre7         : "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version",
+            kotlin_stdlib_jre8         : "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version",
+            kotlin_stdlib_js           : "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlin_version",
+            kotlin_reflect             : "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version",
+            serialization_common       : "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$serialization_version",
+            coroutines_common          : "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$coroutines_version",
+            kotlin_test_common         : ["org.jetbrains.kotlin:kotlin-test-common:$kotlin_version",
+                                          "org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlin_version"],
+            kotlin_extensions          : "com.github.carleslc:kotlin-extensions:$kotlin_extensions_version",
+
+            // JVM
+            retrofit                   : ["com.squareup.retrofit2:retrofit:$retrofit_version",
+                                          "com.squareup.retrofit2:converter-gson:$retrofit_version",
+                                          "com.squareup.retrofit2:converter-scalars:$retrofit_version",
+                                          "com.squareup.okhttp3:okhttp:$okhttp_version",
+                                          "com.squareup.okhttp3:logging-interceptor:$okhttp_version",
+                                          "ru.gildor.coroutines:kotlin-coroutines-retrofit:$coroutines_retrofit_version"],
+            gson                       : "com.google.code.gson:gson:$gson_version",
+            junit                      : "junit:junit:$junit_version",
+            kotlin_junit               : ["org.jetbrains.kotlin:kotlin-test:$kotlin_version",
+                                          "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"],
+            kotlin_serialization_jvm   : "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serialization_version",
+            coroutines_jvm             : "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version",
+
+            // Android
+            firebase                   : ["com.google.firebase:firebase-core:$firebase_version",
+                                          "com.google.firebase:firebase-messaging:$firebase_version"],
+            anko                       : ["org.jetbrains.anko:anko:$anko_version",
+                                          "org.jetbrains.anko:anko-sdk25:$anko_version",
+                                          "org.jetbrains.anko:anko-appcompat-v7:$anko_version",
+                                          "org.jetbrains.anko:anko-coroutines:$anko_version",
+                                          "org.jetbrains.anko:anko-sdk25-coroutines:$anko_version",
+                                          "org.jetbrains.anko:anko-appcompat-v7-coroutines:$anko_version",
+                                          "org.jetbrains.anko:anko-constraint-layout:$anko_version"],
+            glide                      : "com.github.bumptech.glide:glide:$glide_version",
+            activitystarter_kotlin     : ["com.marcinmoskala.activitystarter:activitystarter:$activitystarter_version",
+                                          "com.marcinmoskala.activitystarter:activitystarter-kotlin:$activitystarter_version"],
+            activitystarter_compiler   : "com.marcinmoskala.activitystarter:activitystarter-compiler:$activitystarter_version",
+            android_support            : ["com.android.support:design:$android_version",
+                                          "com.android.support:appcompat-v7:$android_version",
+                                          "com.android.support:recyclerview-v7:$android_version",
+                                          "com.android.support.constraint:constraint-layout:$constraint_layout_version"],
+            test_runner                : "com.android.support.test:runner:$test_runner_version",
+            espresso                   : "com.android.support.test.espresso:espresso-core:$espresso_version",
+            kotlin_preferences         : ["com.marcinmoskala.PreferenceHolder:preferenceholder:$kotlin_preferences_version"],
+            guava                      : "com.google.guava:guava:$guava_android_version",
+            multidex                   : "com.android.support:multidex:$multidex_version"
+    ]
+}

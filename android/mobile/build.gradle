@@ -1,0 +1,62 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+
+android {
+    compileSdkVersion 27
+    buildToolsVersion "27.0.3"
+
+    defaultConfig {
+        applicationId "ai.zenkai.zenkai"
+        minSdkVersion 19
+        targetSdkVersion 27
+        versionCode 1
+        versionName "0.1"
+        multiDexEnabled true
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        debug {}
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    flavorDimensions "server"
+    productFlavors {
+        local {
+            dimension "server"
+        }
+        production {
+            dimension "server"
+        }
+        mock {
+            dimension "server"
+        }
+    }
+}
+
+repositories {
+    maven { url "https://jitpack.io" }
+    jcenter()
+    google()
+}
+
+dependencies {
+    implementation project(':android:common')
+    implementation dep.activitystarter_kotlin
+    implementation dep.kotlin_preferences
+    kapt dep.activitystarter_compiler
+
+    androidTestImplementation dep.test_runner
+    androidTestImplementation(dep.espresso, {
+        exclude group: 'com.android.support', module: 'support-annotations'
+        exclude group: 'com.google.code.findbugs'
+    })
+}
+
+//apply plugin: 'com.google.gms.google-services'
+apply from: '../androidconfig.gradle'

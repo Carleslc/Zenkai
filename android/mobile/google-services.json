@@ -1,0 +1,51 @@
+{
+  "project_info": {
+    "project_number": "889899151999",
+    "project_id": "zenkai-assistant"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:889899151999:android:881d15c275d35e1e",
+        "android_client_info": {
+          "package_name": "ai.zenkai.zenkai"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "889899151999-rdv2ha3t850qvf3hq8b1va9vciijr97d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "ai.zenkai.zenkai",
+            "certificate_hash": "12299de5151cdd279232f9dbe520ee098c79e5e7"
+          }
+        },
+        {
+          "client_id": "889899151999-7vt82aro4prinj6p8fqqlko6ofhjvokv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDkamXlMrEjUE2_0uYNA2ass3AsQDc1uJM"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 2,
+          "analytics_property": {
+            "tracking_id": "UA-105317697-3"
+          }
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

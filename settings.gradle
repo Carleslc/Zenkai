@@ -1,0 +1,14 @@
+rootProject.name = 'Zenkai'
+//include 'web'
+//include 'backend'
+//include 'desktop'
+include 'common'
+//include 'common-js'
+include 'common-jvm'
+include 'common-client'
+include 'common-client-jvm'
+//include 'common-client-js'
+
+if (INCLUDE_ANDROID == "true") {
+    include 'android', 'android:common', 'android:mobile'//, 'android:wear'
+}

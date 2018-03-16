@@ -1,0 +1,35 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+
+android {
+    compileSdkVersion 27
+    buildToolsVersion "27.0.3"
+    defaultConfig {
+        minSdkVersion 19
+        targetSdkVersion 27
+        multiDexEnabled true
+    }
+}
+
+repositories {
+    maven { url "https://jitpack.io" }
+    jcenter()
+    google()
+}
+
+dependencies {
+    api project(':common-client-jvm')
+    api dep.multidex
+    api dep.kotlin_stdlib_jre7
+    api dep.kotlin_reflect
+    api dep.android_support
+    api dep.kotlin_extensions
+    api dep.anko
+
+    implementation dep.glide
+    api fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+apply from: '../androidconfig.gradle'

@@ -1,0 +1,62 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+allprojects {
+    buildscript {
+        ext.kotlin_version = '1.2.30'
+        ext.serialization_version = '0.4'
+        ext.coroutines_version = '0.22.5'
+        //ext.nodeVersion = '8.9.4'
+
+        repositories {
+            jcenter()
+            google()
+            maven { url 'https://maven.google.com' }
+            maven { url "https://jitpack.io" }
+            maven { url 'http://dl.bintray.com/kotlin/kotlin-eap-1.2' }
+            maven { url "https://kotlin.bintray.com/kotlinx" }
+            maven { url "https://plugins.gradle.org/m2/" }
+            maven { url "http://dl.bintray.com/kotlin/kotlin-dev" }
+            maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }
+            mavenCentral()
+            mavenLocal()
+        }
+
+        dependencies {
+            classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+            //classpath "org.jetbrains.kotlin:kotlin-frontend-plugin:0.0.27"
+            classpath "org.jetbrains.kotlinx:kotlinx-gradle-serialization-plugin:$serialization_version"
+            classpath 'com.android.tools.build:gradle:3.0.1'
+            //classpath 'com.google.gms:google-services:3.1.1'
+            //classpath 'com.moowork.gradle:gradle-node-plugin:1.2.0'
+            classpath "com.github.jengelman.gradle.plugins:shadow:2.0.1"
+        }
+    }
+
+    repositories {
+        jcenter()
+        google()
+        maven { url 'https://maven.google.com' }
+        maven { url "https://jitpack.io" }
+        maven { url 'http://dl.bintray.com/kotlin/kotlin-eap-1.2' }
+        maven { url "https://kotlin.bintray.com/kotlinx" }
+        maven { url "https://plugins.gradle.org/m2/" }
+        maven { url "http://dl.bintray.com/kotlin/kotlin-dev" }
+        maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }
+        mavenCentral()
+        mavenLocal()
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+
+/*task serverPrepare(type: Copy, dependsOn: [":web:build", ":web:bundle"]) {
+    doFirst { delete "$rootDir/backend/static" }
+    from "$rootDir/web/build/bundle", "$rootDir/web/src/main/web"
+    into "$rootDir/backend/static/static"
+    finalizedBy ":backend:build"
+}*/
+
+apply from: 'dependencies.gradle'
+apply from: 'imagesShare.gradle'
