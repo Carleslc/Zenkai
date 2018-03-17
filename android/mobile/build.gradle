@@ -17,6 +17,10 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
+    packagingOptions {
+        exclude 'META-INF'
+    }
+
     buildTypes {
         debug {}
         release {
@@ -50,7 +54,6 @@ dependencies {
     implementation dep.activitystarter_kotlin
     implementation dep.kotlin_preferences
     kapt dep.activitystarter_compiler
-
     androidTestImplementation dep.test_runner
     androidTestImplementation(dep.espresso, {
         exclude group: 'com.android.support', module: 'support-annotations'

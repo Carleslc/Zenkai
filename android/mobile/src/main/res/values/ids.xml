@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <item type="id" name="main_layout"/>
+  <item type="id" name="chat_messages_layout"/>
+  <item type="id" name="chat_input_layout"/>
+  <item type="id" name="voice_input_layout"/>
+  <item type="id" name="microphone"/>
+</resources>

@@ -6,8 +6,8 @@ import kotlinx.coroutines.experimental.launch
 import kotlin.coroutines.experimental.CoroutineContext
 
 // Should be set for different platforms
-var UI: CoroutineContext = DefaultDispatcher
+var UIx: CoroutineContext = DefaultDispatcher
 
-fun launchUI(block: suspend () -> Unit): Job = launch(UI) { block() }
+fun launchUI(block: suspend () -> Unit): Job = launch(UIx) { block() }
 
 expect suspend fun delay(time: Long)

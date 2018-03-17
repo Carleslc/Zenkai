@@ -1,6 +1,8 @@
 ext {
     // Common
     kotlin_extensions_version = '0.7.7'
+    klogging_version = '1.2.30'
+    coroutines_version = '0.22.5'
 
     // JVM
     retrofit_version = '2.3.0'
@@ -8,6 +10,7 @@ ext {
     okhttp_version = '3.6.0'
     gson_version = '2.8.2'
     junit_version = '4.12'
+    sl4j_version='1.7.25'
 
     // Android
     android_version = '27.0.2'
@@ -33,6 +36,7 @@ ext {
             kotlin_test_common         : ["org.jetbrains.kotlin:kotlin-test-common:$kotlin_version",
                                           "org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlin_version"],
             kotlin_extensions          : "com.github.carleslc:kotlin-extensions:$kotlin_extensions_version",
+            klogging_common            : "com.github.lewik.klogging:klogging.common:$klogging_version",
 
             // JVM
             retrofit                   : ["com.squareup.retrofit2:retrofit:$retrofit_version",
@@ -47,17 +51,23 @@ ext {
                                           "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"],
             kotlin_serialization_jvm   : "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serialization_version",
             coroutines_jvm             : "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version",
+            klogging_jvm               : ["com.github.lewik.klogging:klogging.jvm:$klogging_version",
+                                          "org.slf4j:slf4j-android:$sl4j_version"],
 
             // Android
             firebase                   : ["com.google.firebase:firebase-core:$firebase_version",
                                           "com.google.firebase:firebase-messaging:$firebase_version"],
-            anko                       : ["org.jetbrains.anko:anko:$anko_version",
-                                          "org.jetbrains.anko:anko-sdk25:$anko_version",
-                                          "org.jetbrains.anko:anko-appcompat-v7:$anko_version",
-                                          "org.jetbrains.anko:anko-coroutines:$anko_version",
-                                          "org.jetbrains.anko:anko-sdk25-coroutines:$anko_version",
-                                          "org.jetbrains.anko:anko-appcompat-v7-coroutines:$anko_version",
-                                          "org.jetbrains.anko:anko-constraint-layout:$anko_version"],
+            anko                       : ["org.jetbrains.anko:anko-commons:$anko_version",
+                                          //"org.jetbrains.anko:anko-design:$anko_version",
+                                          //"org.jetbrains.anko:anko-design-coroutines:$anko_version",
+                                          "org.jetbrains.anko:anko-sdk19:$anko_version",
+                                          //"org.jetbrains.anko:anko-appcompat-v7:$anko_version",
+                                          "org.jetbrains.anko:anko-recyclerview-v7:$anko_version",
+                                          //"org.jetbrains.anko:anko-coroutines:$anko_version",
+                                          //"org.jetbrains.anko:anko-sdk19-coroutines:$anko_version",
+                                          //"org.jetbrains.anko:anko-appcompat-v7-coroutines:$anko_version",
+                                          //"org.jetbrains.anko:anko-constraint-layout:$anko_version"
+                                          ],
             glide                      : "com.github.bumptech.glide:glide:$glide_version",
             activitystarter_kotlin     : ["com.marcinmoskala.activitystarter:activitystarter:$activitystarter_version",
                                           "com.marcinmoskala.activitystarter:activitystarter-kotlin:$activitystarter_version"],
@@ -66,6 +76,7 @@ ext {
                                           "com.android.support:appcompat-v7:$android_version",
                                           "com.android.support:recyclerview-v7:$android_version",
                                           "com.android.support.constraint:constraint-layout:$constraint_layout_version"],
+            coroutines_android         : "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version",
             test_runner                : "com.android.support.test:runner:$test_runner_version",
             espresso                   : "com.android.support.test.espresso:espresso-core:$espresso_version",
             kotlin_preferences         : ["com.marcinmoskala.PreferenceHolder:preferenceholder:$kotlin_preferences_version"],

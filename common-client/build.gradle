@@ -1,8 +1,10 @@
 apply plugin: 'kotlin-platform-common'
 
 dependencies {
-    implementation project(':common')
-    implementation dep.coroutines_common
+    compile project(':common')
+    compile dep.coroutines_common
+    implementation dep.kotlin_reflect
+    implementation dep.klogging_common
     implementation dep.kotlin_stdlib_common
     testImplementation dep.kotlin_test_common
 }

@@ -9,4 +9,11 @@ abstract class Provider<T> {
 
     fun get(): T = override ?: original
     fun lazyGet(): Lazy<T> = lazy { get() }
+    
+    companion object Factory {
+        fun <T: Service> create(service: T) = object : Provider<T>() {
+            override fun create() = service
+        }
+    }
+    
 }

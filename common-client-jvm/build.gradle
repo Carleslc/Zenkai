@@ -2,9 +2,11 @@ apply plugin: 'kotlin-platform-jvm'
 
 dependencies {
     expectedBy project(':common-client')
-    implementation project(':common-jvm')
+    compile project(':common-jvm')
 
     implementation dep.kotlin_stdlib_jre8
+    implementation dep.klogging_jvm
+    implementation dep.kotlin_reflect
     implementation dep.coroutines_jvm
     implementation dep.retrofit
 
