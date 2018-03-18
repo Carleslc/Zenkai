@@ -10,7 +10,9 @@ ext {
     okhttp_version = '3.6.0'
     gson_version = '2.8.2'
     junit_version = '4.12'
-    sl4j_version='1.7.25'
+    sl4j_version = '1.7.25'
+    datetime_version = '1.0.5'
+    prettytime_version = '4.0.1.Final'
 
     // Android
     android_version = '27.0.2'
@@ -22,6 +24,7 @@ ext {
     test_runner_version = '1.0.1'
     kotlin_preferences_version = '1.51'
     constraint_layout_version = '1.1.0-beta5'
+    kotlinandroidviewbindings_version = '0.12'
     guava_android_version = '23.3-android'
     multidex_version = '1.0.3'
 
@@ -53,25 +56,28 @@ ext {
             coroutines_jvm             : "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version",
             klogging_jvm               : ["com.github.lewik.klogging:klogging.jvm:$klogging_version",
                                           "org.slf4j:slf4j-android:$sl4j_version"],
+            datetime_jvm               : "com.jakewharton.threetenabp:threetenabp:$datetime_version",
+            prettytime                 : "org.ocpsoft.prettytime:prettytime:$prettytime_version",
 
             // Android
             firebase                   : ["com.google.firebase:firebase-core:$firebase_version",
                                           "com.google.firebase:firebase-messaging:$firebase_version"],
             anko                       : ["org.jetbrains.anko:anko-commons:$anko_version",
-                                          //"org.jetbrains.anko:anko-design:$anko_version",
-                                          //"org.jetbrains.anko:anko-design-coroutines:$anko_version",
+                                          //"org.jetbrains.anko:anko-support-v4-commons:$anko_version",
+                                          "org.jetbrains.anko:anko-design:$anko_version",
+                                          "org.jetbrains.anko:anko-design-coroutines:$anko_version",
                                           "org.jetbrains.anko:anko-sdk19:$anko_version",
-                                          //"org.jetbrains.anko:anko-appcompat-v7:$anko_version",
+                                          "org.jetbrains.anko:anko-appcompat-v7:$anko_version",
                                           "org.jetbrains.anko:anko-recyclerview-v7:$anko_version",
-                                          //"org.jetbrains.anko:anko-coroutines:$anko_version",
-                                          //"org.jetbrains.anko:anko-sdk19-coroutines:$anko_version",
-                                          //"org.jetbrains.anko:anko-appcompat-v7-coroutines:$anko_version",
-                                          //"org.jetbrains.anko:anko-constraint-layout:$anko_version"
-                                          ],
+                                          "org.jetbrains.anko:anko-coroutines:$anko_version",
+                                          "org.jetbrains.anko:anko-sdk19-coroutines:$anko_version",
+                                          "org.jetbrains.anko:anko-appcompat-v7-coroutines:$anko_version",
+                                          "org.jetbrains.anko:anko-constraint-layout:$anko_version"],
             glide                      : "com.github.bumptech.glide:glide:$glide_version",
             activitystarter_kotlin     : ["com.marcinmoskala.activitystarter:activitystarter:$activitystarter_version",
                                           "com.marcinmoskala.activitystarter:activitystarter-kotlin:$activitystarter_version"],
             activitystarter_compiler   : "com.marcinmoskala.activitystarter:activitystarter-compiler:$activitystarter_version",
+            kotlinandroidviewbindings  : "com.github.MarcinMoskala:KotlinAndroidViewBindings:$kotlinandroidviewbindings_version",
             android_support            : ["com.android.support:design:$android_version",
                                           "com.android.support:appcompat-v7:$android_version",
                                           "com.android.support:recyclerview-v7:$android_version",

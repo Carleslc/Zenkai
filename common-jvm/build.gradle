@@ -5,6 +5,7 @@ dependencies {
     expectedBy project(':common')
 
     implementation dep.kotlin_stdlib_jre8
+    implementation dep.datetime_jvm
     implementation dep.klogging_jvm
     implementation dep.kotlin_reflect
     implementation dep.retrofit

@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.os.Build.VERSION_CODES
 import android.support.annotation.ColorInt
+import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat.getColor
 import android.view.View
 import android.view.ViewGroup.MarginLayoutParams
@@ -45,6 +46,14 @@ fun MarginLayoutParams.margin(context: Context, start: Int = 0, end: Int = 0, to
         topMargin = dip(top)
         bottomMargin = dip(bottom)
     }
+}
+
+fun View.snackbar(message: String) {
+    Snackbar.make(this, message, Snackbar.LENGTH_SHORT).show()
+}
+
+fun View.longSnackbar(message: String) {
+    Snackbar.make(this, message, Snackbar.LENGTH_LONG).show()
 }
 
 private class BorderTransformation(context: Context, private val borderSize: Int,

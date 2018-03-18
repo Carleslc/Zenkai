@@ -26,11 +26,14 @@ dependencies {
     api project(':common-client-jvm')
     api dep.multidex
     api dep.android_support
-    api dep.kotlin_stdlib_jre7
+    api dep.kotlin_stdlib_jre8
+    api dep.datetime_jvm
+    api dep.prettytime
     api dep.klogging_jvm
     api dep.kotlin_reflect
     api dep.coroutines_jvm
     api dep.coroutines_android
+    api dep.kotlinandroidviewbindings
     api dep.kotlin_extensions
     api dep.anko
     implementation dep.glide

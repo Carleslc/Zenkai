@@ -3,8 +3,14 @@ package ai.zenkai.zenkai.services.speech
 import ai.zenkai.zenkai.common.Service
 import ai.zenkai.zenkai.data.VoiceMessage
 
-interface SpeechService: Service {
+abstract class SpeechService: Service {
     
-    fun say(message: VoiceMessage)
+    var enabled = true
+    
+    fun say(message: VoiceMessage) {
+        if (enabled) speak(message)
+    }
+    
+    protected abstract fun speak(message: VoiceMessage)
     
 }

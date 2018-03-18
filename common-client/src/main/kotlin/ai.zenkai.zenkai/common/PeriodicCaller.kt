@@ -1,9 +1,6 @@
-package ai.zenkai.zenkai.usecases
+package ai.zenkai.zenkai.common
 
 import kotlinx.coroutines.experimental.Job
-import ai.zenkai.zenkai.common.Provider
-import ai.zenkai.zenkai.common.delay
-import ai.zenkai.zenkai.common.launchUI
 
 interface PeriodicCaller {
 
