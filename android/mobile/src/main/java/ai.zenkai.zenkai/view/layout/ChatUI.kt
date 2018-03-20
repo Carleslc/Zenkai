@@ -1,13 +1,15 @@
 package ai.zenkai.zenkai.view.layout
 
-import ai.zenkai.zenkai.view.ChatActivity
 import ai.zenkai.zenkai.R
-import ai.zenkai.zenkai.common.elevate
-import ai.zenkai.zenkai.common.margin
+import ai.zenkai.zenkai.common.extensions.elevate
+import ai.zenkai.zenkai.common.extensions.margin
+import ai.zenkai.zenkai.view.ChatActivity
+import android.graphics.drawable.Drawable
 import android.support.v4.content.ContextCompat.getDrawable
 import android.support.v7.widget.RecyclerView
 import android.view.Gravity.CENTER
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import org.jetbrains.anko.*
@@ -21,11 +23,15 @@ class ChatUI : AnkoComponent<ChatActivity> {
     var refresh: ProgressBar by notNull()
     var messages: RecyclerView by notNull()
     var action: RelativeLayout by notNull()
+    var actionImage: ImageView by notNull()
     var textInput: EditText by notNull()
     
     var text
         get() = textInput.text.toString().trim()
         set(value) = textInput.setText(value)
+    
+    private var enabledFabBg: Drawable by notNull()
+    private var disabledFabBg: Drawable by notNull()
     
     override fun createView(ui: AnkoContext<ChatActivity>) = with(ui) {
         relativeLayout {
@@ -52,19 +58,22 @@ class ChatUI : AnkoComponent<ChatActivity> {
                     id = R.id.voice_input_layout
                     elevate(4)
         
-                    imageView {
-                        id = R.id.microphone
+                    actionImage = imageView {
+                        id = R.id.action_image
                         imageResource = R.drawable.ic_mic
                     }.lparams(width = dip(25), height = dip(25)) {
                         centerInParent()
+                        centerHorizontally()
                     }
-                    
-                    background = getDrawable(ctx, R.drawable.fab)
                 }.lparams(width = dip(50), height = dip(50)) {
                     margin(ctx, 0, 5, 0, 10)
                     alignParentEnd()
                     centerInParent()
                 }
+    
+                enabledFabBg = getDrawable(ctx, R.drawable.fab)!!
+                disabledFabBg = getDrawable(ctx, R.drawable.disabled_fab)!!
+                actionEnabled(true)
                 
                 // Text
                 relativeLayout {
@@ -91,6 +100,11 @@ class ChatUI : AnkoComponent<ChatActivity> {
                 alignParentBottom()
             }
         }
+    }
+    
+    fun actionEnabled(enabled: Boolean) {
+        action.isEnabled = enabled
+        action.background = if (enabled) enabledFabBg else disabledFabBg
     }
     
 }

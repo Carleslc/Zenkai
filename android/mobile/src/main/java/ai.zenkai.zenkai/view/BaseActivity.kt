@@ -2,7 +2,7 @@ package ai.zenkai.zenkai.view
 
 import ai.zenkai.zenkai.BuildConfig
 import ai.zenkai.zenkai.common.HttpError
-import ai.zenkai.zenkai.common.snackbar
+import ai.zenkai.zenkai.common.extensions.snackbar
 import ai.zenkai.zenkai.presentation.BaseView
 import ai.zenkai.zenkai.presentation.Presenter
 import android.os.Bundle

@@ -4,35 +4,36 @@ import ai.zenkai.zenkai.data.Message
 import ai.zenkai.zenkai.presentation.BasePresenter
 import ai.zenkai.zenkai.repositories.MessagesRepository
 import ai.zenkai.zenkai.services.speech.say
+import kotlinx.coroutines.experimental.CoroutineScope
 
 class MessagesPresenter(val view: MessagesView) : BasePresenter() {
 
     private val repository by MessagesRepository.lazyGet()
     
-    fun load() {
+    override fun onCreate() {
         addAll()
     }
     
-    fun onNewMessage(message: Message) {
-        UI {
-            view.add(message)
-            val answer = repository.query(message)
-            view.add(answer)
-            answer.say()
-        }
+    fun onNewMessage(message: Message) = loading {
+        view.add(message)
+        val answer = repository.query(message)
+        view.add(answer)
+        answer.say()
     }
 
-    private fun addAll() {
-        UI {
-            try {
-                view.loading = true
-                val messages = repository.getHistory().messages.sortedByDescending { it.date }
-                view.add(messages)
-            } catch (e: Throwable) {
-                view.showError(e)
-            } finally {
-                view.loading = false
-            }
+    private fun addAll() = loading {
+        val messages = repository.getHistory().messages.sortedBy { it.date }
+        view.addAll(messages)
+    }
+    
+    private fun loading(block: suspend CoroutineScope.() -> Unit) = UI {
+        try {
+            view.loading = true
+            block()
+        } catch (e: Throwable) {
+            view.showError(e)
+        } finally {
+            view.loading = false
         }
     }
     

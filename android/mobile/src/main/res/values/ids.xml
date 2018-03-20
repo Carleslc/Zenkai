@@ -4,5 +4,5 @@
   <item type="id" name="chat_messages_layout"/>
   <item type="id" name="chat_input_layout"/>
   <item type="id" name="voice_input_layout"/>
-  <item type="id" name="microphone"/>
+  <item type="id" name="action_image"/>
 </resources>

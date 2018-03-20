@@ -1,4 +1,4 @@
-package ai.zenkai.zenkai.common
+package ai.zenkai.zenkai.common.extensions
 
 import android.annotation.SuppressLint
 import android.os.Build.VERSION

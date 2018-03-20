@@ -11,4 +11,4 @@ var UIx: CoroutineContext = DefaultDispatcher
 
 fun launchUI(block: suspend CoroutineScope.() -> Unit): Job = launch(UIx) { block() }
 
-expect suspend fun delay(time: Long)
+expect suspend fun delay(millis: Long)

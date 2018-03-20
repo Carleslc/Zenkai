@@ -1,5 +1,6 @@
 package ai.zenkai.zenkai.repositories
 
+import ai.zenkai.zenkai.common.delay
 import ai.zenkai.zenkai.data.BotMessage
 import ai.zenkai.zenkai.data.Message
 import ai.zenkai.zenkai.data.MessagesData
@@ -12,6 +13,7 @@ class MessagesRepositoryImpl: MessagesRepository {
     )
     
     override suspend fun query(message: Message): BotMessage {
+        delay(2000)
         examples.add(message)
         val answer = BotMessage(message.message)
         examples.add(answer)

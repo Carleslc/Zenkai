@@ -9,6 +9,6 @@ interface MessagesView : BaseView {
     
     fun add(message: Message)
     
-    fun add(messages: Collection<Message>) = messages.forEach(::add)
+    fun addAll(messages: Collection<Message>)
     
 }

@@ -5,13 +5,27 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 
-open class BaseRecyclerViewAdapter<T : ItemAdapter<out BaseViewHolder>>(initialItems: List<T> = listOf())
-    : RecyclerView.Adapter<BaseViewHolder>() {
+open class BaseRecyclerViewAdapter<T : ItemAdapter<out BaseViewHolder>>(initialItems: List<T> = listOf(),
+    private val attached: RecyclerView) : RecyclerView.Adapter<BaseViewHolder>() {
 
-    val items: MutableList<T> = initialItems.toMutableList()
+    protected val items: MutableList<T> = initialItems.toMutableList()
 
     open fun setCustomItemViewParams(parent: ViewGroup, itemView: View) {}
 
+    fun add(item: T) {
+        items.add(item)
+        val end = itemCount - 1
+        notifyItemInserted(end)
+        attached.scrollToPosition(end)
+    }
+    
+    fun addAll(newItems: Collection<T>) {
+        val start = itemCount
+        items.addAll(newItems)
+        notifyItemRangeInserted(start, newItems.size)
+        attached.scrollToPosition(start)
+    }
+    
     final override fun getItemCount() = items.size
 
     final override fun getItemViewType(position: Int) = items[position].layoutId

@@ -1,4 +1,4 @@
-package ai.zenkai.zenkai.common
+package ai.zenkai.zenkai.common.extensions
 
 import ai.zenkai.zenkai.DateTime
 import org.ocpsoft.prettytime.PrettyTime

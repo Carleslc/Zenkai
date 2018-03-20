@@ -7,4 +7,4 @@ private val executor = Executors.newSingleThreadScheduledExecutor {
     Thread(it, "scheduler").apply { isDaemon = true }
 }
 
-actual suspend fun delay(time: Long): Unit = kotlinx.coroutines.experimental.delay(time, TimeUnit.MILLISECONDS)
+actual suspend fun delay(millis: Long): Unit = kotlinx.coroutines.experimental.delay(millis, TimeUnit.MILLISECONDS)

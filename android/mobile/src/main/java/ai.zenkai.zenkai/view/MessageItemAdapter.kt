@@ -1,10 +1,10 @@
 package ai.zenkai.zenkai.view
 
 import ai.zenkai.zenkai.R
-import ai.zenkai.zenkai.common.bindView
+import ai.zenkai.zenkai.common.extensions.bindView
 import ai.zenkai.zenkai.common.recycler.BaseViewHolder
 import ai.zenkai.zenkai.common.recycler.ItemAdapter
-import ai.zenkai.zenkai.common.visible
+import ai.zenkai.zenkai.common.extensions.visible
 import ai.zenkai.zenkai.data.BotMessage
 import ai.zenkai.zenkai.data.Message
 import android.view.View
