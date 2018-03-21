@@ -41,6 +41,7 @@ class ChatActivity : BaseActivity(), MessagesView {
         fun RecyclerView.initMessages() {
             setHasFixedSize(true)
             messagesAdapter = MessagesAdapter(attached = UI.messages)
+            messagesAdapter.setHasStableIds(true)
             adapter = messagesAdapter
             layoutManager = LinearLayoutManager(ctx)
             itemAnimator = DefaultItemAnimator()

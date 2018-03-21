@@ -19,16 +19,20 @@ class MessagesAdapter(initialMessages: List<Message> = listOf(), private val att
     fun add(message: Message) {
         messages.add(message)
         val end = itemCount - 1
-        notifyItemInserted(end)
         attached.scrollToPosition(end)
+        notifyItemInserted(end)
     }
     
     fun addAll(newMessages: Collection<Message>) {
         val start = itemCount
         messages.addAll(newMessages)
-        notifyItemRangeInserted(start, newMessages.size)
         attached.scrollToPosition(start)
+        notifyItemRangeInserted(start, newMessages.size)
     }
+    
+    override fun getItemId(position: Int) = position.toLong()
+    
+    override fun getItemViewType(position: Int) = position
     
     override fun getItemCount() = messages.size
 
