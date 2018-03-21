@@ -4,7 +4,9 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build.VERSION_CODES
 import android.support.design.widget.Snackbar
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
 import org.jetbrains.anko.*
 
@@ -36,4 +38,8 @@ fun View.snackbar(message: String) {
 
 fun View.longSnackbar(message: String) {
     Snackbar.make(this, message, Snackbar.LENGTH_LONG).show()
+}
+
+fun ViewGroup.inflate(layoutRes: Int): View {
+    return LayoutInflater.from(context).inflate(layoutRes, this, false)
 }

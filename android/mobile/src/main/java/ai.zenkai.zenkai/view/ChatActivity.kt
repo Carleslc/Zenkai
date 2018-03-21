@@ -3,7 +3,6 @@ package ai.zenkai.zenkai.view
 import ai.zenkai.zenkai.R.string
 import ai.zenkai.zenkai.common.TextMicAnimator
 import ai.zenkai.zenkai.common.extensions.visible
-import ai.zenkai.zenkai.common.recycler.BaseRecyclerViewAdapter
 import ai.zenkai.zenkai.data.Message
 import ai.zenkai.zenkai.data.TextMessage
 import ai.zenkai.zenkai.presentation.messages.MessagesPresenter
@@ -23,7 +22,7 @@ class ChatActivity : BaseActivity(), MessagesView {
     
     private val UI by lazy { ChatUI() }
     
-    private var messagesAdapter: BaseRecyclerViewAdapter<MessageItemAdapter> by notNull()
+    private var messagesAdapter: MessagesAdapter by notNull()
     
     override var loading = false
         set(value) {
@@ -41,7 +40,7 @@ class ChatActivity : BaseActivity(), MessagesView {
     private fun init() {
         fun RecyclerView.initMessages() {
             setHasFixedSize(true)
-            messagesAdapter = BaseRecyclerViewAdapter(attached = UI.messages)
+            messagesAdapter = MessagesAdapter(attached = UI.messages)
             adapter = messagesAdapter
             layoutManager = LinearLayoutManager(ctx)
             itemAnimator = DefaultItemAnimator()
@@ -54,11 +53,11 @@ class ChatActivity : BaseActivity(), MessagesView {
     }
     
     override fun add(message: Message) {
-        messagesAdapter.add(MessageItemAdapter(message))
+        messagesAdapter.add(message)
     }
     
     override fun addAll(messages: Collection<Message>) {
-        messagesAdapter.addAll(messages.map { MessageItemAdapter(it) })
+        messagesAdapter.addAll(messages)
     }
     
     private fun onSend() {
