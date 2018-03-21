@@ -15,6 +15,8 @@ class MessagesAdapter(initialMessages: List<Message> = listOf(), private val att
     : RecyclerView.Adapter<MessagesAdapter.ViewHolder>() {
 
     private val messages = initialMessages.toMutableList()
+    
+    init { setHasStableIds(true) }
 
     fun add(message: Message) {
         messages.add(message)
