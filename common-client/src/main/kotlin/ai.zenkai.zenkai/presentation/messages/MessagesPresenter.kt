@@ -1,5 +1,6 @@
 package ai.zenkai.zenkai.presentation.messages
 
+import ai.zenkai.zenkai.common.launchUI
 import ai.zenkai.zenkai.data.BotMessage
 import ai.zenkai.zenkai.data.Message
 import ai.zenkai.zenkai.exceptions.ListeningException
@@ -11,9 +12,11 @@ import ai.zenkai.zenkai.i18n.S
 import ai.zenkai.zenkai.repositories.RepositoriesProvider
 import ai.zenkai.zenkai.services.speech.SpeechService.SpeakingListener
 import ai.zenkai.zenkai.services.speech.SpeechService.SpeakingListener.Merge.merge
+import klogging.KLoggerHolder
+import klogging.WithLogging
 import kotlinx.coroutines.experimental.CoroutineScope
 
-class MessagesPresenter(val view: MessagesView) : BasePresenter() {
+class MessagesPresenter(val view: MessagesView) : BasePresenter(), WithLogging by KLoggerHolder() {
 
     private val repository by MessagesRepository.lazyGet()
     
@@ -27,7 +30,7 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter() {
                 view.add(message)
             }
             override fun onSpeakCompleted() {
-                onMicrophone()
+                onMicrophone(true)
             }
         })
         message.say()
@@ -36,7 +39,9 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter() {
     private fun addSay(message: BotMessage) {
         merge(message.speech, object : SpeakingListener {
             override fun onSpeakStarted() {
-                view.add(message)
+                launchUI {
+                    view.add(message)
+                }
             }
         })
         message.say()
@@ -50,7 +55,7 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter() {
         if (firstTime) {
             RepositoriesProvider.getSettingsRepository().setFirstTime()
         } else {
-            onMicrophone()
+            onMicrophone(true)
         }
     }
     
@@ -62,8 +67,8 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter() {
         }
     }
     
-    fun onMicrophone() = UI {
-        if (!view.loading && view.hasMicrophonePermission()) {
+    fun onMicrophone(request: Boolean = false) = UI {
+        if (!view.loading && view.hasMicrophonePermission(request)) {
             view.loading = true
             ServicesProvider.getSpeechService().listen(object : ListeningCallback {
                 override fun onResult(request: Message, response: BotMessage) {
@@ -87,7 +92,7 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter() {
     fun onMicrophonePermission(allowed: Boolean) {
         ServicesProvider.getSpeechService().microphoneEnabled = allowed
         if (allowed) {
-            onMicrophone()
+            onMicrophone(true)
         } else {
             view.show(S.MICROPHONE_DISABLED)
         }

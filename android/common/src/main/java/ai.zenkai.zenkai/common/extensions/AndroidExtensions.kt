@@ -13,9 +13,11 @@ fun requiresVersion(apiVersion: Int, block: () -> Unit): Boolean {
     return (VERSION.SDK_INT >= apiVersion).alsoIfTrue(block)
 }
 
-fun hasPermission(activity: Activity, permission: String, requestCode: Int): Boolean {
+fun hasPermission(activity: Activity, permission: String, requestCode: Int, request: Boolean = false): Boolean {
     if (ContextCompat.checkSelfPermission(activity, permission) != PackageManager.PERMISSION_GRANTED) {
-        ActivityCompat.requestPermissions(activity, arrayOf(permission), requestCode)
+        if (request) {
+            ActivityCompat.requestPermissions(activity, arrayOf(permission), requestCode)
+        }
         return false
     }
     return true

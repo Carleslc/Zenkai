@@ -3,7 +3,6 @@ apply plugin: 'kotlin-platform-jvm'
 dependencies {
     expectedBy project(':common-client')
     compile project(':common-jvm')
-
     implementation dep.kotlin_stdlib_jre8
     implementation dep.klogging_jvm
     implementation dep.kotlin_reflect
@@ -12,7 +11,6 @@ dependencies {
     implementation dep.apache_commons
     implementation dep.dialogflow
     implementation dep.gson
-
     testImplementation dep.junit
     testImplementation dep.kotlin_junit
 }

@@ -16,7 +16,6 @@ import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.speech.tts.TextToSpeech
 import android.speech.tts.TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID
-import android.speech.tts.TextToSpeech.OnUtteranceCompletedListener
 import android.speech.tts.UtteranceProgressListener
 import org.jetbrains.anko.*
 import kotlin.properties.Delegates.notNull

@@ -11,6 +11,6 @@ interface MessagesView : BaseView {
     
     fun addAll(messages: Collection<Message>)
     
-    fun hasMicrophonePermission(): Boolean
+    fun hasMicrophonePermission(request: Boolean = false): Boolean
     
 }

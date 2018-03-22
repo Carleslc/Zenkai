@@ -99,11 +99,11 @@ class ChatActivity : BaseActivity(), MessagesView {
     }
     
     private fun onMicrophone() {
-        presenter.onMicrophone()
+        presenter.onMicrophone(true)
     }
     
-    override fun hasMicrophonePermission(): Boolean {
-        return hasPermission(this, Manifest.permission.RECORD_AUDIO, AndroidPermissions.Code.RECORD_AUDIO)
+    override fun hasMicrophonePermission(request: Boolean): Boolean {
+        return hasPermission(this, Manifest.permission.RECORD_AUDIO, AndroidPermissions.Code.RECORD_AUDIO, request)
     }
     
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
