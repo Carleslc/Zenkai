@@ -3,6 +3,8 @@ package ai.zenkai.zenkai.view.layout
 import ai.zenkai.zenkai.R
 import ai.zenkai.zenkai.common.extensions.elevate
 import ai.zenkai.zenkai.common.extensions.margin
+import ai.zenkai.zenkai.i18n.S
+import ai.zenkai.zenkai.i18n.i18n
 import ai.zenkai.zenkai.view.ChatActivity
 import android.graphics.drawable.Drawable
 import android.support.v4.content.ContextCompat.getDrawable
@@ -83,7 +85,7 @@ class ChatUI : AnkoComponent<ChatActivity> {
                     elevate(2)
     
                     textInput = editText {
-                        hint = ctx.getString(R.string.text_input_hint)
+                        hint = i18n[S.INPUT_TEXT_HINT]
                         minHeight = dip(INPUT_TEXT_HEIGHT)
                         textSize = 18f
                         background = getDrawable(ctx, R.color.white)

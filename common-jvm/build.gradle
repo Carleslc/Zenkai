@@ -1,6 +1,10 @@
 apply plugin: 'kotlin-platform-jvm'
 apply plugin: 'kotlinx-serialization'
 
+sourceSets {
+    main.resources.srcDirs += "$rootDir/common/properties"
+}
+
 dependencies {
     expectedBy project(':common')
 

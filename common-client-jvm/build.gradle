@@ -9,6 +9,9 @@ dependencies {
     implementation dep.kotlin_reflect
     implementation dep.coroutines_jvm
     implementation dep.retrofit
+    implementation dep.apache_commons
+    implementation dep.dialogflow
+    implementation dep.gson
 
     testImplementation dep.junit
     testImplementation dep.kotlin_junit

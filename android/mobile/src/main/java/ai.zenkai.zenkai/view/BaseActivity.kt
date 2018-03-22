@@ -24,22 +24,22 @@ abstract class BaseActivity : AppCompatActivity(), BaseView, AnkoLogger {
         super.onDestroy()
         lazyPresenters.forEach { it.value.onDestroy() }
     }
+    
+    override fun show(message: String) {
+        contentView?.snackbar(message) ?: toast(message)
+    }
 
     override fun showError(error: Throwable) {
         logError(error)
         val message = if (error is HttpError) {
-            "Http error! Code: ${error.code} Message: ${error.message}"
+            "Error ${error.message}. Check your internet connection!"
         } else {
-            "Error ${error.message}"
+            error.message ?: "Error: ${error::class.simpleName}"
         }
         show(message)
     }
 
     override fun logError(error: Throwable) {
         if (BuildConfig.DEBUG) error(error.message, error)
-    }
-    
-    fun show(message: String) {
-        contentView?.snackbar(message) ?: toast(message)
     }
 }

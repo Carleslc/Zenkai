@@ -7,9 +7,11 @@ import ai.zenkai.zenkai.data.MessagesData
 
 interface MessagesRepository {
 
+    fun getGreetings(): List<BotMessage>
+    
     suspend fun getHistory(): MessagesData
     
-    suspend fun query(message: Message): BotMessage
+    suspend fun ask(message: Message): BotMessage
 
     companion object : Provider<MessagesRepository>() {
         override fun create(): MessagesRepository = RepositoriesProvider.getMessagesRepository()

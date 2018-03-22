@@ -35,6 +35,7 @@ dependencies {
     api dep.coroutines_android
     api dep.kotlinandroidviewbindings
     api dep.kotlin_extensions
+    api dep.dialogflow
     api dep.anko
     implementation dep.glide
     api fileTree(include: ['*.jar'], dir: 'libs')

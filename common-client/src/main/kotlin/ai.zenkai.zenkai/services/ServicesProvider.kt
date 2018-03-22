@@ -1,21 +1,20 @@
 package ai.zenkai.zenkai.services
 
-import ai.zenkai.zenkai.common.Provider
+import ai.zenkai.zenkai.services.bot.BotService
+import ai.zenkai.zenkai.services.bot.DialogFlowService
 import ai.zenkai.zenkai.services.speech.DefaultSpeechService
 import ai.zenkai.zenkai.services.speech.SpeechService
 
 object ServicesProvider {
     
-    private var speechProvider: Provider<SpeechService> = DefaultSpeechService.Factory
+    private var speechService: SpeechService = DefaultSpeechService.create()
     
-    fun getSpeechService(): SpeechService = speechProvider.get()
-    
-    fun setSpeechServiceProvider(speechProvider: Provider<SpeechService>) {
-        this.speechProvider = speechProvider
-    }
+    fun getSpeechService(): SpeechService = speechService
     
     fun setSpeechService(speechService: SpeechService) {
-        setSpeechServiceProvider(Provider.create(speechService))
+        this.speechService = speechService
     }
+    
+    fun getBotService(): BotService = DialogFlowService
     
 }

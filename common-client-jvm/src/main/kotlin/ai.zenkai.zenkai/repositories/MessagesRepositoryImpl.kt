@@ -1,28 +1,25 @@
 package ai.zenkai.zenkai.repositories
 
-import ai.zenkai.zenkai.common.delay
 import ai.zenkai.zenkai.data.BotMessage
 import ai.zenkai.zenkai.data.Message
 import ai.zenkai.zenkai.data.MessagesData
+import ai.zenkai.zenkai.i18n.S.GREETING
+import ai.zenkai.zenkai.i18n.S.HELLO
+import ai.zenkai.zenkai.services.ServicesProvider
 
 class MessagesRepositoryImpl: MessagesRepository {
     
-    private val examples = mutableListOf<Message>(
-        BotMessage("Hi! I'm Zenkai, your personal assistant."),
-        BotMessage("What do you want to do?")
-    )
+    override fun getGreetings() = listOf(BotMessage(HELLO),
+        BotMessage(GREETING))
     
-    override suspend fun query(message: Message): BotMessage {
-        delay(2000)
-        examples.add(message)
-        val answer = BotMessage(message.message)
-        examples.add(answer)
+    override suspend fun ask(message: Message): BotMessage {
+        //database.add(message)
+        val answer = ServicesProvider.getBotService().ask(message)
+        //database.add(answer)
         return answer
     }
     
-    override suspend fun getHistory(): MessagesData {
-        // TODO get from Firebase Database
-        return MessagesData(examples)
-    }
+    // TODO get all previous messages from Firebase Database
+    override suspend fun getHistory() = MessagesData()
     
 }

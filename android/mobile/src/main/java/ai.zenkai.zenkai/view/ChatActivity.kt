@@ -1,13 +1,18 @@
 package ai.zenkai.zenkai.view
 
 import ai.zenkai.zenkai.R.string
+import ai.zenkai.zenkai.common.AndroidPermissions
 import ai.zenkai.zenkai.common.TextMicAnimator
+import ai.zenkai.zenkai.common.extensions.hasPermission
 import ai.zenkai.zenkai.common.extensions.visible
+import ai.zenkai.zenkai.common.services.speech.AndroidSpeechService
 import ai.zenkai.zenkai.data.Message
 import ai.zenkai.zenkai.data.TextMessage
 import ai.zenkai.zenkai.presentation.messages.MessagesPresenter
 import ai.zenkai.zenkai.presentation.messages.MessagesView
 import ai.zenkai.zenkai.view.layout.ChatUI
+import ai.zenkai.zenkai.view.layout.DialogflowMicrophoneDialog
+import android.Manifest
 import android.os.Bundle
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.LinearLayoutManager
@@ -24,16 +29,21 @@ class ChatActivity : BaseActivity(), MessagesView {
     
     private var messagesAdapter: MessagesAdapter by notNull()
     
+    private var firstResume = true
+    
     override var loading = false
         set(value) {
             UI.actionEnabled(!value)
             UI.refresh.visible = value
+            field = value
         }
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         UI.setContentView(this)
+        AndroidSpeechService.attach(applicationContext, DialogflowMicrophoneDialog(this))
         init()
+        greetings()
         info("${getString(string.name)} Started")
     }
     
@@ -52,6 +62,29 @@ class ChatActivity : BaseActivity(), MessagesView {
         }
     }
     
+    private fun greetings() {
+        presenter.greetings()
+    }
+    
+    override fun onPause() {
+        AndroidSpeechService.stop()
+        super.onPause()
+    }
+    
+    override fun onResume() {
+        if (!firstResume) {
+            presenter.onMicrophone()
+        } else {
+            firstResume = false
+        }
+        super.onResume()
+    }
+    
+    override fun onDestroy() {
+        AndroidSpeechService.shutdown()
+        super.onDestroy()
+    }
+    
     override fun add(message: Message) {
         messagesAdapter.add(message)
     }
@@ -66,7 +99,15 @@ class ChatActivity : BaseActivity(), MessagesView {
     }
     
     private fun onMicrophone() {
-        show("Not implemented yet")
+        presenter.onMicrophone()
+    }
+    
+    override fun hasMicrophonePermission(): Boolean {
+        return hasPermission(this, Manifest.permission.RECORD_AUDIO, AndroidPermissions.Code.RECORD_AUDIO)
+    }
+    
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        AndroidPermissions.onRequestMicrophone(presenter, requestCode, permissions, grantResults)
     }
     
 }

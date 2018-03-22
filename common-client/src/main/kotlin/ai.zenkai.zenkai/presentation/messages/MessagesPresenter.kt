@@ -1,9 +1,16 @@
 package ai.zenkai.zenkai.presentation.messages
 
+import ai.zenkai.zenkai.data.BotMessage
 import ai.zenkai.zenkai.data.Message
+import ai.zenkai.zenkai.exceptions.ListeningException
 import ai.zenkai.zenkai.presentation.BasePresenter
 import ai.zenkai.zenkai.repositories.MessagesRepository
-import ai.zenkai.zenkai.services.speech.say
+import ai.zenkai.zenkai.services.ServicesProvider
+import ai.zenkai.zenkai.services.speech.SpeechService.ListeningCallback
+import ai.zenkai.zenkai.i18n.S
+import ai.zenkai.zenkai.repositories.RepositoriesProvider
+import ai.zenkai.zenkai.services.speech.SpeechService.SpeakingListener
+import ai.zenkai.zenkai.services.speech.SpeechService.SpeakingListener.Merge.merge
 import kotlinx.coroutines.experimental.CoroutineScope
 
 class MessagesPresenter(val view: MessagesView) : BasePresenter() {
@@ -11,18 +18,83 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter() {
     private val repository by MessagesRepository.lazyGet()
     
     override fun onCreate() {
-        addAll()
+        addHistory()
     }
     
-    fun onNewMessage(message: Message) = loading {
-        view.add(message)
-        val answer = repository.query(message)
-        view.add(answer)
-        answer.say()
+    private fun addSayMic(message: BotMessage) {
+        merge(message.speech, object : SpeakingListener {
+            override fun onSpeakStarted() {
+                view.add(message)
+            }
+            override fun onSpeakCompleted() {
+                onMicrophone()
+            }
+        })
+        message.say()
+    }
+    
+    private fun addSay(message: BotMessage) {
+        merge(message.speech, object : SpeakingListener {
+            override fun onSpeakStarted() {
+                view.add(message)
+            }
+        })
+        message.say()
+    }
+    
+    fun greetings() {
+        val firstTime = RepositoriesProvider.getSettingsRepository().isFirstTime()
+        ServicesProvider.getSpeechService().speakerEnabled = firstTime
+        repository.getGreetings().forEach(::addSay)
+        ServicesProvider.getSpeechService().speakerEnabled = true
+        if (firstTime) {
+            RepositoriesProvider.getSettingsRepository().setFirstTime()
+        } else {
+            onMicrophone()
+        }
+    }
+    
+    fun onNewMessage(request: Message) = loading {
+        if (!request.isEmpty()) {
+            view.add(request)
+            val response = repository.ask(request)
+            addSay(response)
+        }
+    }
+    
+    fun onMicrophone() = UI {
+        if (!view.loading && view.hasMicrophonePermission()) {
+            view.loading = true
+            ServicesProvider.getSpeechService().listen(object : ListeningCallback {
+                override fun onResult(request: Message, response: BotMessage) {
+                    view.add(request)
+                    addSayMic(response)
+                    view.loading = false
+                }
+        
+                override fun onError(error: ListeningException) {
+                    view.showError(error)
+                    view.loading = false
+                }
+        
+                override fun onCancel() {
+                    view.loading = false
+                }
+            })
+        }
+    }
+    
+    fun onMicrophonePermission(allowed: Boolean) {
+        ServicesProvider.getSpeechService().microphoneEnabled = allowed
+        if (allowed) {
+            onMicrophone()
+        } else {
+            view.show(S.MICROPHONE_DISABLED)
+        }
     }
 
-    private fun addAll() = loading {
-        val messages = repository.getHistory().messages.sortedBy { it.date }
+    private fun addHistory() = loading {
+        val messages = repository.getHistory().sortedBy { it.date }
         view.addAll(messages)
     }
     

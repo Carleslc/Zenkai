@@ -1,10 +1,11 @@
 ext {
     // Common
-    kotlin_extensions_version = '0.7.7'
     klogging_version = '1.2.30'
     coroutines_version = '0.22.5'
+    simple_yaml_version = '1.2'
 
     // JVM
+    kotlin_extensions_version = '0.7.7'
     retrofit_version = '2.3.0'
     coroutines_retrofit_version = '0.8.2'
     okhttp_version = '3.6.0'
@@ -13,6 +14,7 @@ ext {
     sl4j_version = '1.7.25'
     datetime_version = '1.0.5'
     prettytime_version = '4.0.1.Final'
+    apache_commons_version = '2.6'
 
     // Android
     android_version = '27.0.2'
@@ -27,6 +29,8 @@ ext {
     kotlinandroidviewbindings_version = '0.12'
     guava_android_version = '23.3-android'
     multidex_version = '1.0.3'
+    dialogflow_libai_version = '1.6.12'
+    dialogflow_sdk_version = '2.0.7@aar'
 
     dep = [
             kotlin_stdlib_common       : "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlin_version",
@@ -40,6 +44,7 @@ ext {
                                           "org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlin_version"],
             kotlin_extensions          : "com.github.carleslc:kotlin-extensions:$kotlin_extensions_version",
             klogging_common            : "com.github.lewik.klogging:klogging.common:$klogging_version",
+            simple_yaml                : "com.github.carleslc:simple-yaml:$simple_yaml_version",
 
             // JVM
             retrofit                   : ["com.squareup.retrofit2:retrofit:$retrofit_version",
@@ -58,6 +63,7 @@ ext {
                                           "org.slf4j:slf4j-android:$sl4j_version"],
             datetime_jvm               : "com.jakewharton.threetenabp:threetenabp:$datetime_version",
             prettytime                 : "org.ocpsoft.prettytime:prettytime:$prettytime_version",
+            apache_commons             : "commons-io:commons-io:$apache_commons_version",
 
             // Android
             firebase                   : ["com.google.firebase:firebase-core:$firebase_version",
@@ -87,6 +93,8 @@ ext {
             espresso                   : "com.android.support.test.espresso:espresso-core:$espresso_version",
             kotlin_preferences         : ["com.marcinmoskala.PreferenceHolder:preferenceholder:$kotlin_preferences_version"],
             guava                      : "com.google.guava:guava:$guava_android_version",
-            multidex                   : "com.android.support:multidex:$multidex_version"
+            multidex                   : "com.android.support:multidex:$multidex_version",
+            dialogflow                 : ["ai.api:libai:$dialogflow_libai_version",
+                                          "ai.api:sdk:$dialogflow_sdk_version"]
     ]
 }
