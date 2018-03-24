@@ -1,5 +1,6 @@
 package ai.zenkai.zenkai.view
 
+import ai.zenkai.zenkai.R
 import ai.zenkai.zenkai.R.string
 import ai.zenkai.zenkai.common.AndroidPermissions
 import ai.zenkai.zenkai.common.TextMicAnimator
@@ -36,18 +37,19 @@ class ChatActivity : BaseActivity(), MessagesView {
             UI.actionEnabled(!value)
             UI.refresh.visible = value
             field = value
+            debug { "Loading $value" }
         }
     
     override fun onCreate(savedInstanceState: Bundle?) {
+        setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState)
         UI.setContentView(this)
         AndroidSpeechService.attach(applicationContext, DialogflowMicrophoneDialog(this))
-        init()
-        greetings()
+        init(savedInstanceState)
         info("${getString(string.name)} Started")
     }
     
-    private fun init() {
+    private fun init(savedInstanceState: Bundle?) {
         fun RecyclerView.initMessages() {
             setHasFixedSize(true)
             messagesAdapter = MessagesAdapter(attached = UI.messages)
@@ -57,22 +59,27 @@ class ChatActivity : BaseActivity(), MessagesView {
         }
         UI.messages.initMessages()
         UI.textInput.addTextChangedListener(TextMicAnimator(ctx, UI.actionImage))
+        UI.text = savedInstanceState?.getString("textInput") ?: ""
         UI.action.setOnClickListener {
             UI.text.isEmpty().letIfTrue(::onMicrophone, ::onSend)
         }
+        presenter.onInit()
     }
     
-    private fun greetings() {
-        presenter.greetings()
+    override fun onSaveInstanceState(outState: Bundle?) {
+        outState?.putString("textInput", UI.text)
+        super.onSaveInstanceState(outState)
     }
     
     override fun onPause() {
+        debug { "Pause" }
         AndroidSpeechService.stop()
         super.onPause()
     }
     
     override fun onResume() {
         if (!firstResume) {
+            debug { "Resume" }
             presenter.onMicrophone()
         } else {
             firstResume = false
@@ -81,6 +88,7 @@ class ChatActivity : BaseActivity(), MessagesView {
     }
     
     override fun onDestroy() {
+        debug { "Destroy" }
         AndroidSpeechService.shutdown()
         super.onDestroy()
     }

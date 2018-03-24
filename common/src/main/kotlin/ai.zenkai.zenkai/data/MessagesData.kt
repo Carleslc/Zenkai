@@ -1,7 +1,7 @@
 package ai.zenkai.zenkai.data
 
-data class MessagesData(val messages: List<Message>) : Collection<Message> by messages {
+data class MessagesData(private val messages: MutableList<Message>) : MutableCollection<Message> by messages {
     
-    constructor() : this(emptyList())
+    constructor() : this(mutableListOf())
     
 }

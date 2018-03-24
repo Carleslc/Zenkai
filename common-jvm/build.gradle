@@ -10,10 +10,12 @@ dependencies {
 
     implementation dep.kotlin_stdlib_jre8
     implementation dep.datetime_jvm
+    implementation dep.kotlin_extensions
     implementation dep.klogging_jvm
     implementation dep.kotlin_reflect
     implementation dep.retrofit
     implementation dep.kotlin_serialization_jvm
+    implementation dep.emoji
     implementation dep.gson
 
     testImplementation dep.junit

@@ -4,6 +4,7 @@ dependencies {
     expectedBy project(':common-client')
     compile project(':common-jvm')
     implementation dep.kotlin_stdlib_jre8
+    implementation dep.kotlin_extensions
     implementation dep.klogging_jvm
     implementation dep.kotlin_reflect
     implementation dep.coroutines_jvm

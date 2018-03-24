@@ -5,21 +5,25 @@ import ai.zenkai.zenkai.data.Message
 import ai.zenkai.zenkai.data.MessagesData
 import ai.zenkai.zenkai.i18n.S.GREETING
 import ai.zenkai.zenkai.i18n.S.HELLO
-import ai.zenkai.zenkai.services.ServicesProvider
+import klogging.KLoggerHolder
+import klogging.WithLogging
 
-class MessagesRepositoryImpl: MessagesRepository {
+class MessagesRepositoryImpl: MessagesRepository, WithLogging by KLoggerHolder() {
     
-    override fun getGreetings() = listOf(BotMessage(HELLO),
-        BotMessage(GREETING))
+    private var greetingsList = listOf(BotMessage(HELLO), BotMessage(GREETING))
+    private val session = MessagesData()
     
-    override suspend fun ask(message: Message): BotMessage {
-        //database.add(message)
-        val answer = ServicesProvider.getBotService().ask(message)
-        //database.add(answer)
-        return answer
+    override suspend fun greetings(): List<BotMessage> {
+        val greetings = greetingsList
+        logger.debug { "[${this::class.simpleName}] Greetings!" }
+        greetingsList = emptyList()
+        return greetings
+    }
+    
+    override suspend fun add(message: Message) {
+        session.add(message)
     }
     
     // TODO get all previous messages from Firebase Database
-    override suspend fun getHistory() = MessagesData()
-    
+    override suspend fun getHistory() = session
 }

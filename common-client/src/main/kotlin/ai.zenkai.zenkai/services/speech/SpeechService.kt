@@ -7,22 +7,25 @@ import ai.zenkai.zenkai.data.VoiceMessage
 import ai.zenkai.zenkai.exceptions.ListeningException
 import ai.zenkai.zenkai.i18n.SupportedLanguage
 import ai.zenkai.zenkai.services.ServicesProvider
+import klogging.KLoggerHolder
+import klogging.WithLogging
 
-abstract class SpeechService: Service {
+abstract class SpeechService: Service, WithLogging by KLoggerHolder() {
     
-    var microphoneEnabled = true
-    var speakerEnabled = true
+    open var microphoneEnabled = true
+    open var speakerEnabled = true
     
     var language: SupportedLanguage
         get() = ServicesProvider.getBotService().language
         set(value) { ServicesProvider.getBotService().language = value }
     
     fun say(message: VoiceMessage) {
-        if (speakerEnabled) {
+        if (speakerEnabled && !message.isEmpty()) {
             onSpeak(message)
         } else {
+            logger.debug { "[${this::class.simpleName}] Speaker is disabled for '${message.message}'" }
             message.speakingListener?.onSpeakStarted()
-            message.speakingListener?.onSpeakCompleted()
+            message.speakingListener?.onSpeakCancelled()
         }
     }
     
@@ -34,8 +37,10 @@ abstract class SpeechService: Service {
     
     fun listen(callback: ListeningCallback) {
         if (microphoneEnabled) {
+            logger.debug { "[${this::class.simpleName}] Listening" }
             onListen(callback)
         } else {
+            logger.debug { "[${this::class.simpleName}] Cannot listen, microphone is disabled" }
             callback.onCancel()
         }
     }
@@ -51,6 +56,7 @@ abstract class SpeechService: Service {
     interface SpeakingListener {
         fun onSpeakStarted() { }
         fun onSpeakCompleted() { }
+        fun onSpeakCancelled() { }
         
         companion object Merge {
             fun merge(message: VoiceMessage, new: SpeakingListener) {
@@ -63,6 +69,10 @@ abstract class SpeechService: Service {
                     override fun onSpeakCompleted() {
                         currentListener?.onSpeakCompleted()
                         new.onSpeakCompleted()
+                    }
+                    override fun onSpeakCancelled() {
+                        currentListener?.onSpeakCancelled()
+                        new.onSpeakCancelled()
                     }
                 }
             }

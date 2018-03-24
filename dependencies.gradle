@@ -15,6 +15,7 @@ ext {
     datetime_version = '1.0.5'
     prettytime_version = '4.0.1.Final'
     apache_commons_version = '2.6'
+    emoji_version = '4.0.0'
 
     // Android
     android_version = '27.0.2'
@@ -64,6 +65,7 @@ ext {
             datetime_jvm               : "com.jakewharton.threetenabp:threetenabp:$datetime_version",
             prettytime                 : "org.ocpsoft.prettytime:prettytime:$prettytime_version",
             apache_commons             : "commons-io:commons-io:$apache_commons_version",
+            emoji                      : "com.vdurmont:emoji-java:$emoji_version",
 
             // Android
             firebase                   : ["com.google.firebase:firebase-core:$firebase_version",

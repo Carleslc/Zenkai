@@ -4,9 +4,10 @@ import ai.zenkai.zenkai.repositories.DeviceSettings
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.SharedPreferences.Editor
+import org.jetbrains.anko.*
 import kotlin.properties.Delegates.notNull
 
-object DeviceSettingsSharedPreferences : DeviceSettings {
+object DeviceSettingsSharedPreferences : DeviceSettings, AnkoLogger {
     
     private var context: Context by notNull()
     private var sharedPreferences: SharedPreferences by notNull()
@@ -33,6 +34,7 @@ object DeviceSettingsSharedPreferences : DeviceSettings {
         val editor = sharedPreferences.edit()
         block(editor)
         editor.apply()
+        debug { "Edited preferences" }
     }
     
 }

@@ -6,12 +6,12 @@ import ai.zenkai.zenkai.data.Message
 import ai.zenkai.zenkai.data.MessagesData
 
 interface MessagesRepository {
-
-    fun getGreetings(): List<BotMessage>
     
+    suspend fun greetings(): List<BotMessage>
+
     suspend fun getHistory(): MessagesData
     
-    suspend fun ask(message: Message): BotMessage
+    suspend fun add(message: Message)
 
     companion object : Provider<MessagesRepository>() {
         override fun create(): MessagesRepository = RepositoriesProvider.getMessagesRepository()

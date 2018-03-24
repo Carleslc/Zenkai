@@ -7,7 +7,9 @@ expect class DateTime: Comparable<DateTime> {
     
     override fun toString(): String
     
-    companion object Factory {
+    companion object {
+    
+        fun getTimeZone(): String
         
         fun now(): DateTime
         

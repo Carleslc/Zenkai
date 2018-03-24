@@ -1,6 +1,7 @@
 package ai.zenkai.zenkai
 
 import org.threeten.bp.Instant
+import org.threeten.bp.ZoneId
 import java.util.Date
 
 actual class DateTime(val instant: Instant): Comparable<DateTime> {
@@ -11,7 +12,9 @@ actual class DateTime(val instant: Instant): Comparable<DateTime> {
     
     override fun compareTo(other: DateTime) = instant.compareTo(other.instant)
     
-    actual companion object Factory {
+    actual companion object {
+    
+        actual fun getTimeZone() = ZoneId.systemDefault().id!!
         
         actual fun now() = DateTime(Instant.now())
         

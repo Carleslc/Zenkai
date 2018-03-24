@@ -1,0 +1,65 @@
+<html>
+
+<!-- https://codepen.io/anon/pen/eMRJRE -->
+
+<head>
+  <script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+  <script src="https://api.trello.com/1/client.js?key=73642f2e72b94b950a4699fdcf652eeb"></script>
+</head>
+
+<body>
+  <button onclick="authenticate()">Auth</button>
+  <input name="listId" type="text" id="listId" value="5aa727c8b9ba69b5fe8cfcc2"/>
+  <button onclick="create()">Create card</button>
+  <input name="cardId" type="text" id="cardId"/>
+  <button onclick="update()">Update card</button>
+  <script>
+  var authenticationSuccess = function() {
+      console.log('Successful authentication');
+  };
+
+  var authenticationFailure = function() {
+      console.log('Failed authentication');
+  };
+
+  function authenticate() {
+    window.Trello.authorize({
+      type: 'popup',
+      name: 'Getting Started Application',
+      scope: {
+          read: 'true',
+          write: 'true'
+      },
+      expiration: 'never',
+      success: authenticationSuccess,
+      error: authenticationFailure
+    });
+  }
+
+  function create() {
+    var myList = $('#listId').val();
+
+    var creationSuccess = function (data) {
+      console.log('Card created successfully.');
+      console.log(JSON.stringify(data, null, 2));
+    };
+
+    var newCard = {
+      name: 'Test Card', 
+      desc: 'This is the description of our new card.',
+      idList: myList,
+      pos: 'top'
+    };
+
+    window.Trello.post('/cards/', newCard, creationSuccess);
+  }
+
+  function update() {
+    var myCard = $('#cardId').val();
+
+    window.Trello.put('/cards/' + myCard, {name: 'New Test Card'});
+  }
+  </script>
+</body>
+
+</html>
