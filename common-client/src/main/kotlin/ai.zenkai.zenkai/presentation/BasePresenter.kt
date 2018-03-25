@@ -4,7 +4,6 @@ import ai.zenkai.zenkai.common.doAsync
 import ai.zenkai.zenkai.common.launchUI
 import kotlinx.coroutines.experimental.CoroutineScope
 import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.launch
 
 abstract class BasePresenter : Presenter {
 

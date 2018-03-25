@@ -3,10 +3,11 @@ package ai.zenkai.zenkai.services.bot
 import ai.api.AIConfiguration
 import ai.api.AIConfiguration.SupportedLanguages
 import ai.api.AIDataService
+import ai.api.model.AIEvent
 import ai.api.model.AIOriginalRequest
 import ai.api.model.AIRequest
 import ai.api.model.AIResponse
-import ai.api.model.Fulfillment
+import ai.api.model.ResponseMessage.ResponseSpeech
 import ai.zenkai.zenkai.DateTime
 import ai.zenkai.zenkai.common.doAsync
 import ai.zenkai.zenkai.data.BotMessage
@@ -31,10 +32,9 @@ actual object DialogFlowService : BotService, WithLogging by KLoggerHolder() {
     
     private var provider: AIConfigurationProvider by notNull()
     
-    var config: AIConfiguration by notNull()
-        private set
+    private var dataService: AIDataService by notNull()
     
-    var dataService: AIDataService by notNull()
+    var config: AIConfiguration by notNull()
         private set
     
     override var language = DEFAULT_LANGUAGE
@@ -49,40 +49,88 @@ actual object DialogFlowService : BotService, WithLogging by KLoggerHolder() {
         this.provider = provider
     }
     
-    override suspend fun ask(message: Message): BotMessage {
+    private suspend fun sendEvent(name: String, data: Map<String, String>? = null): List<BotMessage> {
+        return doAsync {
+            val response = dataService.request(AIRequest().apply {
+                setEvent(AIEvent(name).apply {
+                    setData(data)
+                })
+                fillParameters(this)
+            })
+            getBotMessages(response)
+        }.await()
+    }
+    
+    override suspend fun getGreetings() = sendEvent("Greetings")
+    
+    override suspend fun ask(message: Message): List<BotMessage> {
         return doAsync {
             logger.debug { "[${this::class.simpleName}] Ask: ${message.message}" }
             val response = dataService.request(AIRequest().apply {
                 setQuery(message.message)
-                timezone = DateTime.getTimeZone()
-                originalRequest = AIOriginalRequest().apply {
-                    source = "Zenkai App"
-                    data = M["inputs" to L[M["arguments" to L[
-                        Argument("timezone", DateTime.getTimeZone()),
-                        Argument("trello-token", "e3c03af3e5af0d62991cc722780d1ff81c442424d343e019ff379528aea6af5e")
-                    ]]]]
-                }
+                fillParameters(this)
             })
-            getBotMessage(response)
+            getBotMessages(response)
         }.await()
     }
     
-    fun getBotMessage(response: AIResponse): BotMessage {
-        logger.debug { "[${this::class.simpleName}] Response: ${gson.toJson(response)}" }
-        val status = response.status
+    fun fillParameters(request: AIRequest) {
+        request.apply {
+            timezone = DateTime.getTimeZone()
+            originalRequest = AIOriginalRequest().apply {
+                source = "Zenkai App"
+                data = M["inputs" to L[M["arguments" to L[
+                    Argument("timezone", timezone),
+                    Argument("trello-token", "e3c03af3e5af0d62991cc722780d1ff81c442424d343e019ff379528aea6af5e")
+                ]]]]
+            }
+        }
+    }
+    
+    fun getBotMessages(response: AIResponse): List<BotMessage> = with (response) {
+        logger.debug { "[${this::class.simpleName}] Response: ${gson.toJson(this)}" }
+        val status = status
         return if (status.code == PARTIAL_CONTENT) {
             if ("timeout" in status.errorDetails) {
                 logger.debug { "[${this::class.simpleName}] ${status.errorDetails}" }
-                BotMessage(S.TIMEOUT)
+                listOf(BotMessage(S.TIMEOUT))
             } else {
                 logger.debug { "[${this::class.simpleName}] ${status.errorDetails}" }
-                BotMessage(TextMessage(S.EMPTY_ANSWER), VoiceMessage.EMPTY)
+                listOf(BotMessage(TextMessage(S.EMPTY_ANSWER), VoiceMessage()))
             }
+        } else if (result.metadata.isWebhookUsed) {
+            // Actions on Google response format
+            getGoogleSimpleResponses()
         } else {
-            with(response.result.fulfillment) {
-                BotMessage(TextMessage(text), VoiceMessage(speech))
+            // Dialogflow messages format
+            val messages = result.fulfillment.messages.filter { it is ResponseSpeech }.flatMap {
+                val speech = (it as ResponseSpeech).speech
+                if (speech.isEmpty()) {
+                    listOf(BotMessage())
+                } else {
+                    speech.map { BotMessage(it) }
+                }
+            }
+            if (messages.isEmpty()) {
+                listOf(BotMessage(result.fulfillment.speech))
+            } else messages
+        }
+    }
+    
+    private fun AIResponse.getGoogleSimpleResponses(): List<BotMessage> {
+        val data = result.fulfillment.data?.get("google")
+        if (data != null) {
+            val items = data.asJsonObject.get("richResponse")?.asJsonObject?.get("items")?.asJsonArray
+            if (items != null) {
+                return items.map {
+                    val simpleResponse = it.asJsonObject.get("simpleResponse")?.asJsonObject
+                    val text = simpleResponse?.get("displayText")?.asString ?: ""
+                    val speech = simpleResponse?.get("textToSpeech")?.asString ?: ""
+                    BotMessage(text, speech)
+                }
             }
         }
+        return emptyList()
     }
     
     private fun getConfigurationLanguage(language: SupportedLanguage) = when(language) {
@@ -91,6 +139,3 @@ actual object DialogFlowService : BotService, WithLogging by KLoggerHolder() {
     }
     
 }
-
-val Fulfillment.text: String
-    get() = displayText ?: speech

@@ -7,6 +7,8 @@ open class TextMessage(text: String) : Message(text) {
     
     constructor(id: S) : this(i18n[id])
     
+    constructor() : this("")
+    
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || this::class != other::class) return false

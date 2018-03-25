@@ -16,9 +16,8 @@ enum class S {
     INPUT_TEXT_HINT,
     MICROPHONE_DISABLED,
     TTS_ERROR,
-    HELLO,
-    GREETING,
     TIMEOUT,
     EMPTY_ANSWER,
-    TRY_AGAIN;
+    TRY_AGAIN,
+    SPEAK_NOW;
 }

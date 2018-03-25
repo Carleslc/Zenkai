@@ -28,6 +28,7 @@ allprojects {
             //classpath 'com.google.gms:google-services:3.1.1'
             //classpath 'com.moowork.gradle:gradle-node-plugin:1.2.0'
             classpath "com.github.jengelman.gradle.plugins:shadow:2.0.1"
+            classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
         }
     }
 

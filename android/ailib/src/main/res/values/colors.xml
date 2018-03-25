@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="icon_orange_color">@color/orange</color>
+    <color name="mic_button_halo">#20000000</color>
+    <color name="main_bg_color">@color/blue_light</color>
+    <color name="aidialog_background">@color/white</color>
+
+    <color name="transparent">#000000FF</color>
+    <color name="white">#FFFFFF</color>
+    <color name="blue_dark">#0066b6</color>
+    <color name="blue_light">#0F79DD</color>
+    <color name="orange">#f26c29</color>
+    <color name="grey_light">#f4f6f7</color>
+    <color name="grey_medium">#B0B0B0</color>
+    <color name="grey_dark">#505050</color>
+    <color name="black">#000000</color>
+</resources>

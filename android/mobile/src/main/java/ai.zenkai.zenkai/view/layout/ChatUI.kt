@@ -20,7 +20,7 @@ import kotlin.properties.Delegates.notNull
 
 private const val INPUT_TEXT_HEIGHT = 46
 
-class ChatUI : AnkoComponent<ChatActivity> {
+class ChatUI : AnkoComponent<ChatActivity>, AnkoLogger {
     
     var refresh: ProgressBar by notNull()
     var messages: RecyclerView by notNull()
@@ -85,7 +85,6 @@ class ChatUI : AnkoComponent<ChatActivity> {
                     elevate(2)
     
                     textInput = editText {
-                        hint = i18n[S.INPUT_TEXT_HINT]
                         minHeight = dip(INPUT_TEXT_HEIGHT)
                         textSize = 18f
                         background = getDrawable(ctx, R.color.white)

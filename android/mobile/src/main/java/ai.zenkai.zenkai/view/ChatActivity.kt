@@ -1,5 +1,6 @@
 package ai.zenkai.zenkai.view
 
+import ai.zenkai.zenkai.App
 import ai.zenkai.zenkai.R
 import ai.zenkai.zenkai.R.string
 import ai.zenkai.zenkai.common.AndroidPermissions
@@ -9,6 +10,9 @@ import ai.zenkai.zenkai.common.extensions.visible
 import ai.zenkai.zenkai.common.services.speech.AndroidSpeechService
 import ai.zenkai.zenkai.data.Message
 import ai.zenkai.zenkai.data.TextMessage
+import ai.zenkai.zenkai.i18n.S
+import ai.zenkai.zenkai.i18n.i18n
+import ai.zenkai.zenkai.i18n.supportedLanguage
 import ai.zenkai.zenkai.presentation.messages.MessagesPresenter
 import ai.zenkai.zenkai.presentation.messages.MessagesView
 import ai.zenkai.zenkai.view.layout.ChatUI
@@ -20,6 +24,7 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import me.carleslc.kotlin.extensions.standard.letIfTrue
 import org.jetbrains.anko.*
+import java.util.Locale
 import kotlin.properties.Delegates.notNull
 
 class ChatActivity : BaseActivity(), MessagesView {
@@ -41,7 +46,7 @@ class ChatActivity : BaseActivity(), MessagesView {
         }
     
     override fun onCreate(savedInstanceState: Bundle?) {
-        setTheme(R.style.AppTheme);
+        setTheme(R.style.AppTheme)
         super.onCreate(savedInstanceState)
         UI.setContentView(this)
         AndroidSpeechService.attach(applicationContext, DialogflowMicrophoneDialog(this))
@@ -50,6 +55,7 @@ class ChatActivity : BaseActivity(), MessagesView {
     }
     
     private fun init(savedInstanceState: Bundle?) {
+        App.setLanguage(Locale.getDefault().supportedLanguage)
         fun RecyclerView.initMessages() {
             setHasFixedSize(true)
             messagesAdapter = MessagesAdapter(attached = UI.messages)
@@ -58,6 +64,7 @@ class ChatActivity : BaseActivity(), MessagesView {
             itemAnimator = DefaultItemAnimator()
         }
         UI.messages.initMessages()
+        UI.textInput.hint = i18n[S.INPUT_TEXT_HINT]
         UI.textInput.addTextChangedListener(TextMicAnimator(ctx, UI.actionImage))
         UI.text = savedInstanceState?.getString("textInput") ?: ""
         UI.action.setOnClickListener {

@@ -6,11 +6,13 @@ apply plugin: 'kotlin-kapt'
 android {
     compileSdkVersion 27
     buildToolsVersion "27.0.3"
+
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 27
         multiDexEnabled true
     }
+
     packagingOptions {
         exclude 'META-INF'
     }
@@ -23,19 +25,15 @@ repositories {
 }
 
 dependencies {
-    api project(':common-client-jvm')
-    api dep.multidex
-    api dep.android_support
+    api project(':android:ailib')
     api dep.kotlin_stdlib_jre8
     api dep.datetime_jvm
     api dep.prettytime
-    api dep.klogging_jvm
     api dep.kotlin_reflect
     api dep.coroutines_jvm
     api dep.coroutines_android
     api dep.kotlinandroidviewbindings
     api dep.kotlin_extensions
-    api dep.dialogflow
     api dep.anko
     implementation dep.glide
     api fileTree(include: ['*.jar'], dir: 'libs')

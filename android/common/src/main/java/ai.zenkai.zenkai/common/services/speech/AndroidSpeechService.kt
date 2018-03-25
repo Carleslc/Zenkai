@@ -1,10 +1,11 @@
 package ai.zenkai.zenkai.common.services.speech
 
+import ai.api.RequestExtras
 import ai.api.model.AIError
+import ai.api.model.AIRequest
 import ai.api.model.AIResponse
 import ai.zenkai.zenkai.common.IdGenerator
 import ai.zenkai.zenkai.common.services.bot.AndroidAIConfiguration
-import ai.zenkai.zenkai.data.TextMessage
 import ai.zenkai.zenkai.data.VoiceMessage
 import ai.zenkai.zenkai.exceptions.ListeningException
 import ai.zenkai.zenkai.i18n.S
@@ -18,7 +19,6 @@ import android.os.Build.VERSION_CODES
 import android.speech.tts.TextToSpeech
 import android.speech.tts.TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID
 import android.speech.tts.UtteranceProgressListener
-import me.carleslc.kotlin.extensions.standard.letIfTrue
 import org.jetbrains.anko.*
 import kotlin.properties.Delegates.notNull
 
@@ -28,7 +28,7 @@ object AndroidSpeechService : SpeechService(), VoiceListener, AnkoLogger {
     private var context: Context by notNull()
     private var TTS: TextToSpeech by notNull()
     private val utteranceIds by lazy { IdGenerator() }
-    private var listeningCallback: ListeningCallback by notNull()
+    private var listeningCallback: ListeningCallback? = null
     private val pendingMessagesQueue by lazy { mutableListOf<VoiceMessage>() }
     private val speakingMessages by lazy { mutableMapOf<String, VoiceMessage>() }
     
@@ -43,7 +43,7 @@ object AndroidSpeechService : SpeechService(), VoiceListener, AnkoLogger {
                 delaySpeakerEnabling()
             } else {
                 field = value
-                debug { "Speaker disabled" }
+                debug { "Speaker " + if (value) "enabled" else "disabled" }
             }
         }
     
@@ -55,6 +55,7 @@ object AndroidSpeechService : SpeechService(), VoiceListener, AnkoLogger {
     }
     
     fun start() {
+        if (started) return
         debug { "Starting TTS ($language)" }
         TTS = TextToSpeech(context) {
             it.letTTSIfNoError(::started)
@@ -96,6 +97,7 @@ object AndroidSpeechService : SpeechService(), VoiceListener, AnkoLogger {
     }
     
     fun stop() {
+        UI.pause()
         TTS.stop()
         pendingMessagesQueue.forEach {
             it.speakingListener?.onSpeakStarted()
@@ -110,7 +112,7 @@ object AndroidSpeechService : SpeechService(), VoiceListener, AnkoLogger {
     }
     
     fun shutdown() {
-        stop()
+        UI.close()
         TTS.shutdown()
         started = false
         debug { "TTS ($language) Shutdown" }
@@ -132,21 +134,32 @@ object AndroidSpeechService : SpeechService(), VoiceListener, AnkoLogger {
     
     override fun onError(error: AIError) {
         when {
-            error.message == NO_INPUT -> onCancelled()
+            error.message == NO_INPUT -> {}
             error.message == NO_RESULT -> UI.context.toast(i18n[S.TRY_AGAIN])
-            else -> listeningCallback.onError(ListeningException(error.toString()))
+            else -> {
+                listeningCallback?.onError(ListeningException(error.toString()))
+                listeningCallback = null
+                UI.close()
+            }
         }
     }
     
     override fun onCancelled() {
-        listeningCallback.onCancel()
+        debug { "Cancelled microphone" }
+        listeningCallback?.onCancel()
+    }
+    
+    override fun onRequest(query: String, request: AIRequest, requestExtras: RequestExtras?) {
+        listeningCallback?.onRequest(VoiceMessage(query))
+        DialogFlowService.fillParameters(request)
     }
     
     override fun onResult(result: AIResponse) {
         with (result.result) {
             debug { "Received response for '${result.result.resolvedQuery}' on action " +
                 "${result.result.action} with status ${result.status.code}" }
-            listeningCallback.onResult(TextMessage(resolvedQuery.capitalize()), DialogFlowService.getBotMessage(result))
+            listeningCallback?.onResults(DialogFlowService.getBotMessages(result))
+            listeningCallback = null
         }
     }
     
@@ -169,16 +182,13 @@ object AndroidSpeechService : SpeechService(), VoiceListener, AnkoLogger {
     }
     
     private fun delaySpeakerEnabling() {
-        fun enableSpeaker() {
-            speakerEnabled = true
-            debug { "Speaker enabled" }
-        }
-        SpeakingListener.merge(pendingMessagesQueue.last(), object : SpeakingListener {
+        val last = pendingMessagesQueue.last()
+        last.speakingListener = SpeakingListener.merge(last.speakingListener, object : SpeakingListener {
             override fun onSpeakCompleted() {
-                enableSpeaker()
+                speakerEnabled = true
             }
             override fun onSpeakCancelled() {
-                enableSpeaker()
+                speakerEnabled = true
             }
         })
     }

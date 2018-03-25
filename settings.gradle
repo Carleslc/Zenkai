@@ -10,5 +10,5 @@ include 'common-client-jvm'
 //include 'common-client-js'
 
 if (INCLUDE_ANDROID == "true") {
-    include 'android', 'android:common', 'android:mobile'//, 'android:wear'
+    include 'android', 'android:ailib', 'android:common', 'android:mobile'//, 'android:wear'
 }

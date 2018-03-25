@@ -12,4 +12,12 @@ interface VoiceUI {
     
     fun show(config: AndroidAIConfiguration, listener: VoiceListener)
     
+    fun pause()
+    
+    fun resume()
+    
+    fun close()
+    
+    fun isShown(): Boolean
+    
 }

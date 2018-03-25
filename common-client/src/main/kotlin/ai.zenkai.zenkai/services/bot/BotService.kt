@@ -9,6 +9,8 @@ interface BotService : Service {
     
     var language: SupportedLanguage
     
-    suspend fun ask(message: Message): BotMessage
+    suspend fun ask(message: Message): List<BotMessage>
+    
+    suspend fun getGreetings(): List<BotMessage>
     
 }

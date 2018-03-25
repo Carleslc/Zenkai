@@ -7,10 +7,8 @@ import ai.zenkai.zenkai.services.speech.SpeechService.SpeakingListener
 data class VoiceMessage(private val speech: String, var speakingListener: SpeakingListener? = null)
     : Message(speech.removeEmojis()) {
     
-    fun say() = ServicesProvider.getSpeechService().say(this)
+    constructor() : this("")
     
-    companion object Factory {
-        val EMPTY get() = VoiceMessage("")
-    }
+    fun say() = ServicesProvider.getSpeechService().say(this)
     
 }

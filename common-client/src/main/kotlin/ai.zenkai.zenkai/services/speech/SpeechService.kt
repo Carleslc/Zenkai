@@ -48,33 +48,56 @@ abstract class SpeechService: Service, WithLogging by KLoggerHolder() {
     protected abstract fun onListen(callback: ListeningCallback)
     
     interface ListeningCallback {
-        fun onResult(request: Message, response: BotMessage)
+        fun onRequest(request: Message)
+        fun onResults(responses: List<BotMessage>)
         fun onError(error: ListeningException)
         fun onCancel()
     }
     
     interface SpeakingListener {
+        
         fun onSpeakStarted() { }
         fun onSpeakCompleted() { }
         fun onSpeakCancelled() { }
         
-        companion object Merge {
+        companion object Factory {
+            
             fun merge(message: VoiceMessage, new: SpeakingListener) {
-                val currentListener = message.speakingListener
-                message.speakingListener = object : SpeakingListener {
+                message.speakingListener = merge(message.speakingListener, new)
+            }
+            
+            fun merge(old: SpeakingListener?, new: SpeakingListener): SpeakingListener {
+                return object : SpeakingListener {
                     override fun onSpeakStarted() {
-                        currentListener?.onSpeakStarted()
+                        old?.onSpeakStarted()
                         new.onSpeakStarted()
                     }
                     override fun onSpeakCompleted() {
-                        currentListener?.onSpeakCompleted()
+                        old?.onSpeakCompleted()
                         new.onSpeakCompleted()
                     }
                     override fun onSpeakCancelled() {
-                        currentListener?.onSpeakCancelled()
+                        old?.onSpeakCancelled()
                         new.onSpeakCancelled()
                     }
                 }
+            }
+            
+            fun performIfNoError(block: () -> Unit): SpeakingListener {
+                return object : SpeakingListener {
+                    private var spoken = false
+                    override fun onSpeakStarted() {
+                        block()
+                        spoken = true
+                    }
+                    override fun onSpeakCancelled() {
+                        if (!spoken) block()
+                    }
+                }
+            }
+            
+            fun performIfNoError(message: VoiceMessage, block: () -> Unit) {
+                merge(message, performIfNoError(block))
             }
         }
     }

@@ -28,9 +28,11 @@ class App : MultiDexApplication() {
         setLanguage(Locale.getDefault().supportedLanguage)
     }
     
-    private fun setLanguage(language: SupportedLanguage) {
-        i18n.setLanguage(language)
-        ServicesProvider.getSpeechService().language = language
+    companion object {
+        fun setLanguage(language: SupportedLanguage) {
+            i18n.setLanguage(language)
+            ServicesProvider.getSpeechService().language = language
+        }
     }
     
 }

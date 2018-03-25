@@ -3,13 +3,4 @@
     <color name="colorPrimary">@color/blue_light</color>
     <color name="colorPrimaryDark">@color/blue_dark</color>
     <color name="colorAccent">@color/blue_dark</color>
-
-    <color name="transparent">#000000FF</color>
-    <color name="white">#FFFFFF</color>
-    <color name="blue_dark">#0066b6</color>
-    <color name="blue_light">#0F79DD</color>
-    <color name="grey_light">#f4f6f7</color>
-    <color name="grey_medium">#B0B0B0</color>
-    <color name="grey_dark">#505050</color>
-    <color name="black">#000000</color>
 </resources>

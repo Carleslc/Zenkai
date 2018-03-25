@@ -16,6 +16,7 @@ ext {
     prettytime_version = '4.0.1.Final'
     apache_commons_version = '2.6'
     emoji_version = '4.0.0'
+    actions_on_google_version = '1.6.4'
 
     // Android
     android_version = '27.0.2'
@@ -31,7 +32,6 @@ ext {
     guava_android_version = '23.3-android'
     multidex_version = '1.0.3'
     dialogflow_libai_version = '1.6.12'
-    dialogflow_sdk_version = '2.0.7@aar'
 
     dep = [
             kotlin_stdlib_common       : "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlin_version",
@@ -96,7 +96,6 @@ ext {
             kotlin_preferences         : ["com.marcinmoskala.PreferenceHolder:preferenceholder:$kotlin_preferences_version"],
             guava                      : "com.google.guava:guava:$guava_android_version",
             multidex                   : "com.android.support:multidex:$multidex_version",
-            dialogflow                 : ["ai.api:libai:$dialogflow_libai_version",
-                                          "ai.api:sdk:$dialogflow_sdk_version"]
+            dialogflow                 : "ai.api:libai:$dialogflow_libai_version"
     ]
 }

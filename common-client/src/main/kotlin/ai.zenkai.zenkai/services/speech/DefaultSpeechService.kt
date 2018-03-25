@@ -5,7 +5,7 @@ import ai.zenkai.zenkai.data.VoiceMessage
 import klogging.KLoggerHolder
 import klogging.WithLogging
 
-open class DefaultSpeechService: SpeechService(), WithLogging by KLoggerHolder() {
+open class DefaultSpeechService: SpeechService() {
     
     override fun onListen(callback: ListeningCallback) {
         logger.info(DefaultSpeechService::class.simpleName + " cannot listen.")

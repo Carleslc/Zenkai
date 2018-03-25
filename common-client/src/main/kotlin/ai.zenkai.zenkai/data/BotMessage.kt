@@ -5,9 +5,13 @@ import ai.zenkai.zenkai.i18n.i18n
 
 data class BotMessage(val text: TextMessage, val speech: VoiceMessage) : Message(text.message) {
     
+    constructor(text: String, speech: String) : this(TextMessage(text), VoiceMessage(speech))
+    
     constructor(text: String) : this(TextMessage(text), VoiceMessage(text))
     
     constructor(s: S) : this(i18n[s])
+    
+    constructor() : this("")
     
     fun say() = speech.say()
     
