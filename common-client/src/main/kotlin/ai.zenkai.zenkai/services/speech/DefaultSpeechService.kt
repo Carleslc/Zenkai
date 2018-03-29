@@ -1,7 +1,7 @@
 package ai.zenkai.zenkai.services.speech
 
 import ai.zenkai.zenkai.common.Provider
-import ai.zenkai.zenkai.data.VoiceMessage
+import ai.zenkai.zenkai.model.VoiceMessage
 import klogging.KLoggerHolder
 import klogging.WithLogging
 

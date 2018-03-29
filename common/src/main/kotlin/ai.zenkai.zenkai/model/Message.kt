@@ -1,4 +1,4 @@
-package ai.zenkai.zenkai.data
+package ai.zenkai.zenkai.model
 
 import ai.zenkai.zenkai.DateTime
 import ai.zenkai.zenkai.i18n.i18n.formatEmojis
@@ -9,7 +9,7 @@ abstract class Message(message: String) {
     
     val date = DateTime.now()
     
-    fun isEmpty() = message.isEmpty()
+    open fun isEmpty() = message.isBlank()
     
     override fun toString() = "${this::class.simpleName}(message=$message, date=$date)"
     

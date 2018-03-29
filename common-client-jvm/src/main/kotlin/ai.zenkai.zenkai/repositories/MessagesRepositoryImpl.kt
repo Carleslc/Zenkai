@@ -1,8 +1,7 @@
 package ai.zenkai.zenkai.repositories
 
-import ai.zenkai.zenkai.data.BotMessage
-import ai.zenkai.zenkai.data.Message
-import ai.zenkai.zenkai.data.MessagesData
+import ai.zenkai.zenkai.model.BotMessage
+import ai.zenkai.zenkai.model.Message
 import ai.zenkai.zenkai.services.bot.DialogFlowService
 import klogging.KLoggerHolder
 import klogging.WithLogging
@@ -10,7 +9,7 @@ import klogging.WithLogging
 class MessagesRepositoryImpl: MessagesRepository, WithLogging by KLoggerHolder() {
     
     private var needGreetings = true
-    private val session = MessagesData()
+    private val session = mutableListOf<Message>()
     
     override suspend fun greetings(): List<BotMessage> {
         val greetings = if (needGreetings) {

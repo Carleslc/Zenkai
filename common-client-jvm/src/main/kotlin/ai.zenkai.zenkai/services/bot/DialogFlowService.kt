@@ -5,30 +5,38 @@ import ai.api.AIConfiguration.SupportedLanguages
 import ai.api.AIDataService
 import ai.api.model.AIEvent
 import ai.api.model.AIOriginalRequest
+import ai.api.model.AIOutputContext
 import ai.api.model.AIRequest
 import ai.api.model.AIResponse
 import ai.api.model.ResponseMessage.ResponseSpeech
 import ai.zenkai.zenkai.DateTime
 import ai.zenkai.zenkai.common.doAsync
-import ai.zenkai.zenkai.data.BotMessage
-import ai.zenkai.zenkai.data.Message
-import ai.zenkai.zenkai.data.TextMessage
-import ai.zenkai.zenkai.data.VoiceMessage
 import ai.zenkai.zenkai.gson
 import ai.zenkai.zenkai.i18n.DEFAULT_LANGUAGE
-import ai.zenkai.zenkai.i18n.S
+import ai.zenkai.zenkai.i18n.S.EMPTY_ANSWER
+import ai.zenkai.zenkai.i18n.S.TIMEOUT
 import ai.zenkai.zenkai.i18n.SupportedLanguage
 import ai.zenkai.zenkai.i18n.SupportedLanguage.ENGLISH
 import ai.zenkai.zenkai.i18n.SupportedLanguage.SPANISH
+import ai.zenkai.zenkai.model.BotMessage
+import ai.zenkai.zenkai.model.Message
+import ai.zenkai.zenkai.model.TextMessage
+import ai.zenkai.zenkai.model.VoiceMessage
+import ai.zenkai.zenkai.model.Token
+import ai.zenkai.zenkai.repositories.SettingsRepository
+import ai.zenkai.zenkai.serialization.BotError
+import ai.zenkai.zenkai.serialization.BotRequestData
+import ai.zenkai.zenkai.serialization.BotResponse
 import klogging.KLoggerHolder
 import klogging.WithLogging
-import me.carleslc.kotlin.extensions.collections.L
-import me.carleslc.kotlin.extensions.map.M
+import me.carleslc.kotlin.extensions.collections.isBlank
 import kotlin.properties.Delegates.notNull
 
 actual object DialogFlowService : BotService, WithLogging by KLoggerHolder() {
     
+    private const val REPEAT_TIMEOUT_REQUEST_LIMIT = 1
     private const val PARTIAL_CONTENT = 206
+    private const val OK = 200
     
     private var provider: AIConfigurationProvider by notNull()
     
@@ -36,6 +44,8 @@ actual object DialogFlowService : BotService, WithLogging by KLoggerHolder() {
     
     var config: AIConfiguration by notNull()
         private set
+    
+    private var tokenLoginRequest: String? = null
     
     override var language = DEFAULT_LANGUAGE
         set(value) {
@@ -49,93 +59,141 @@ actual object DialogFlowService : BotService, WithLogging by KLoggerHolder() {
         this.provider = provider
     }
     
-    private suspend fun sendEvent(name: String, data: Map<String, String>? = null): List<BotMessage> {
-        return doAsync {
-            val response = dataService.request(AIRequest().apply {
-                setEvent(AIEvent(name).apply {
-                    setData(data)
-                })
-                fillParameters(this)
-            })
-            getBotMessages(response)
-        }.await()
+    private suspend fun repeatOnTimeout(request: () -> AIResponse): Pair<AIResponse, List<BotMessage>> {
+        var timeoutCounter = 0
+        
+        fun BotResult.isTimeout() = timeout && ++timeoutCounter <= REPEAT_TIMEOUT_REQUEST_LIMIT
+        
+        fun getBotMessages(): Pair<AIResponse, List<BotMessage>> {
+            val response = request()
+            with (getBotResult(response)) {
+                if (isTimeout()) return getBotMessages()
+                else onBotResult()
+                return response to messages
+            }
+        }
+        
+        return doAsync { getBotMessages() }.await()
     }
+    
+    override suspend fun sendEvent(name: String, data: Map<String, String>?): List<BotMessage> = repeatOnTimeout {
+        dataService.request(AIRequest().apply {
+            setEvent(AIEvent(name).apply {
+                setData(data)
+            })
+            fillParameters(this)
+        })
+    }.second
     
     override suspend fun getGreetings() = sendEvent("Greetings")
     
-    override suspend fun ask(message: Message): List<BotMessage> {
-        return doAsync {
-            logger.debug { "[${this::class.simpleName}] Ask: ${message.message}" }
-            val response = dataService.request(AIRequest().apply {
-                setQuery(message.message)
-                fillParameters(this)
-            })
-            getBotMessages(response)
-        }.await()
+    suspend fun ask(originalQuery: String, request: AIRequest, setQuery: AIRequest.() -> Unit = {}) = repeatOnTimeout {
+        logger.debug { "[${this::class.simpleName}] Ask: $originalQuery" }
+        dataService.request(request.apply {
+            setQuery()
+            fillParameters(this)
+        })
     }
     
-    fun fillParameters(request: AIRequest) {
+    override suspend fun ask(message: Message): List<BotMessage> = ask(message.message, AIRequest()) {
+        setQuery(message.message) // Unique query for non voice recognition
+    }.second
+    
+    private fun fillParameters(request: AIRequest) {
         request.apply {
             timezone = DateTime.getTimeZone()
             originalRequest = AIOriginalRequest().apply {
-                source = "Zenkai App"
-                data = M["inputs" to L[M["arguments" to L[
-                    Argument("timezone", timezone),
-                    Argument("trello-token", "e3c03af3e5af0d62991cc722780d1ff81c442424d343e019ff379528aea6af5e")
-                ]]]]
+                source = "zenkai"
+                data = mapOf(source to BotRequestData(
+                    timezone,
+                    SettingsRepository.getTokens()
+                ))
             }
         }
     }
     
-    fun getBotMessages(response: AIResponse): List<BotMessage> = with (response) {
+    private fun BotResult.onBotResult() {
+        if (isLoginError()) {
+            tokenLoginRequest = login!! // wait for a token
+        } else if (tokenLoginRequest != null) {
+            val type = tokenLoginRequest!!
+            val token = tokens?.find { it.type == type }
+            if (token != null) {
+                SettingsRepository.setToken(token)
+            }
+        }
+    }
+    
+    private fun getBotResult(response: AIResponse): BotResult = with (response) {
         logger.debug { "[${this::class.simpleName}] Response: ${gson.toJson(this)}" }
         val status = status
-        return if (status.code == PARTIAL_CONTENT) {
+        if (status.code == PARTIAL_CONTENT) {
+            logger.warn { "[${this::class.simpleName}] ${status.errorDetails}" }
             if ("timeout" in status.errorDetails) {
-                logger.debug { "[${this::class.simpleName}] ${status.errorDetails}" }
-                listOf(BotMessage(S.TIMEOUT))
-            } else {
-                logger.debug { "[${this::class.simpleName}] ${status.errorDetails}" }
-                listOf(BotMessage(TextMessage(S.EMPTY_ANSWER), VoiceMessage()))
+                return BotResult.timeout()
             }
-        } else if (result.metadata.isWebhookUsed) {
-            // Actions on Google response format
-            getGoogleSimpleResponses()
-        } else {
-            // Dialogflow messages format
-            val messages = result.fulfillment.messages.filter { it is ResponseSpeech }.flatMap {
-                val speech = (it as ResponseSpeech).speech
-                if (speech.isEmpty()) {
-                    listOf(BotMessage())
-                } else {
-                    speech.map { BotMessage(it) }
-                }
+        } else if (status.code == OK && result.metadata.isWebhookUsed) {
+            val result = getZenkaiResult()
+            if (result.messages.isNotEmpty()) {
+                return result
+            } else if (result.isError()) {
+                val messages = listOf(BotMessage(result.error!!.message))
+                return BotResult(messages, false, result.error)
             }
-            if (messages.isEmpty()) {
-                listOf(BotMessage(result.fulfillment.speech))
-            } else messages
         }
+        return BotResult.success(dialogFlowMessages())
     }
     
-    private fun AIResponse.getGoogleSimpleResponses(): List<BotMessage> {
-        val data = result.fulfillment.data?.get("google")
-        if (data != null) {
-            val items = data.asJsonObject.get("richResponse")?.asJsonObject?.get("items")?.asJsonArray
-            if (items != null) {
-                return items.map {
-                    val simpleResponse = it.asJsonObject.get("simpleResponse")?.asJsonObject
-                    val text = simpleResponse?.get("displayText")?.asString ?: ""
-                    val speech = simpleResponse?.get("textToSpeech")?.asString ?: ""
-                    BotMessage(text, speech)
-                }
+    private fun AIResponse.dialogFlowMessages(): List<BotMessage> {
+        val messages = result.fulfillment.messages.filter { it is ResponseSpeech }.flatMap {
+            val speech = (it as ResponseSpeech).speech
+            if (speech.isBlank()) {
+                listOf()
+            } else {
+                speech.filter { it.isNotBlank() }.map { BotMessage(it) }
             }
         }
-        return emptyList()
+        return if (messages.isEmpty()) {
+            listOf(BotMessage(TextMessage(EMPTY_ANSWER),
+                VoiceMessage()))
+        } else messages
+    }
+    
+    private fun AIResponse.getZenkaiResult(): BotResult {
+        val data = result.fulfillment.data?.get("zenkai")
+        if (data != null) {
+            val response = gson.fromJson(data.asJsonObject, BotResponse::class.java)
+            logger.debug { "Response: $response" }
+            val messages = response.messages.orEmpty().map {
+                BotMessage(text = it.displayText.orEmpty(), speech = it.textToSpeech.orEmpty())
+            }
+            return BotResult(messages, false, response.error, response.tokens)
+        }
+        return BotResult.empty()
     }
     
     private fun getConfigurationLanguage(language: SupportedLanguage) = when(language) {
         ENGLISH -> SupportedLanguages.English
         SPANISH -> SupportedLanguages.Spanish
+    }
+    
+}
+
+private class BotResult(
+    val messages: List<BotMessage>,
+    val timeout: Boolean,
+    val error: BotError? = null,
+    val tokens: List<Token>? = null) {
+    
+    val login get() = error?.login
+    
+    fun isLoginError() = login != null
+    fun isError() = error != null
+    
+    companion object Factory {
+        fun timeout() = BotResult(listOf(BotMessage(TIMEOUT)), true)
+        fun success(messages: List<BotMessage>) = BotResult(messages, false)
+        fun empty() = success(listOf())
     }
     
 }

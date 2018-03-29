@@ -1,4 +1,4 @@
-package ai.zenkai.zenkai.data
+package ai.zenkai.zenkai.model
 
 import ai.zenkai.zenkai.i18n.S
 import ai.zenkai.zenkai.i18n.i18n

@@ -110,10 +110,11 @@ public abstract class AIService {
         this.listener = listener;
     }
 
-    protected void onRequest(final String query, final AIRequest request, final RequestExtras requestExtras) {
+    protected AIResponse onRequest(final String query, final AIRequest request, final RequestExtras requestExtras) {
         if (listener != null) {
-            listener.onRequest(query, request, requestExtras);
+            return listener.onRequest(query, request, requestExtras);
         }
+        return null;
     }
 
     protected void onResult(final AIResponse response) {

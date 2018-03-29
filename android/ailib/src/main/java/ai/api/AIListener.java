@@ -33,7 +33,7 @@ public interface AIListener {
      * @param request the request object, contains query results
      * @param requestExtras request extras like contexts or entities, or null if not specified
      */
-    void onRequest(String query, AIRequest request, RequestExtras requestExtras);
+    AIResponse onRequest(String query, AIRequest request, RequestExtras requestExtras);
 
     /**
      * Event fires when entire process finished successfully, and returns result object

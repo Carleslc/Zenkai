@@ -46,7 +46,7 @@ import ai.api.services.GoogleRecognitionServiceImpl;
 public class AIButton extends SoundLevelButton implements AIListener {
 
     public interface AIButtonListener {
-        void onRequest(final String query, final AIRequest request, RequestExtras requestExtras);
+        AIResponse onRequest(final String query, final AIRequest request, RequestExtras requestExtras);
         void onResult(final AIResponse result);
         void onError(final AIError error);
         void onCancelled();
@@ -67,10 +67,11 @@ public class AIButton extends SoundLevelButton implements AIListener {
     private PartialResultsListener partialResultsListener;
 
     @Override
-    public void onRequest(final String query, final AIRequest request, final RequestExtras requestExtras) {
+    public AIResponse onRequest(final String query, final AIRequest request, final RequestExtras requestExtras) {
         if (resultsListener != null) {
-            resultsListener.onRequest(query, request, requestExtras);
+            return resultsListener.onRequest(query, request, requestExtras);
         }
+        return null;
     }
 
     @Override

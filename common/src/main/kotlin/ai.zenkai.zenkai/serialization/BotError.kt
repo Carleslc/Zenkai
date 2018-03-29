@@ -1,3 +1,3 @@
-package ai.zenkai.zenkai.model
+package ai.zenkai.zenkai.serialization
 
-open class BotError(val message: String, val status: Int, val error: String, val login: String?)
+class BotError(val message: String, val status: Int, val error: String, val login: String?)

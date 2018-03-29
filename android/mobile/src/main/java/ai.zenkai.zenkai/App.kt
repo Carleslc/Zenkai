@@ -22,7 +22,7 @@ class App : MultiDexApplication() {
         super.onCreate()
         UIx = AndroidUI
         AndroidThreeTen.init(ctx)
-        SettingsRepository.deviceSettings = DeviceSettingsSharedPreferences.attach(ctx)
+        SettingsRepository.setDeviceSettings(DeviceSettingsSharedPreferences.attach(ctx))
         DialogFlowService.setConfigurationProvider(AndroidDialogFlowConfigurationProvider)
         ServicesProvider.setSpeechService(AndroidSpeechService)
         setLanguage(Locale.getDefault().supportedLanguage)

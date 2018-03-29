@@ -159,8 +159,8 @@ public class GoogleRecognitionServiceImpl extends AIService {
             protected AIResponse doInBackground(final AIRequest... params) {
                 final AIRequest request = params[0];
                 try {
-                    onRequest(query, request, requestExtras);
-                    return aiDataService.request(request, requestExtras);
+                    AIResponse response = onRequest(query, request, requestExtras);
+                    return response == null ? aiDataService.request(request, requestExtras) : response;
                 } catch (final AIServiceException e) {
                     aiError = new AIError(e);
                     return null;

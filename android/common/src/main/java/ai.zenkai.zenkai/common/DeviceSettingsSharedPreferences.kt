@@ -18,6 +18,8 @@ object DeviceSettingsSharedPreferences : DeviceSettings, AnkoLogger {
         return this
     }
     
+    override fun getAll(): Map<String, *> = sharedPreferences.all
+    
     override operator fun get(id: String, default: Int): Int = sharedPreferences.getInt(id, default)
     
     override operator fun get(id: String, default: String): String = sharedPreferences.getString(id, default)

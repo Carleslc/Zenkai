@@ -6,13 +6,14 @@ import ai.zenkai.zenkai.R.string
 import ai.zenkai.zenkai.common.AndroidPermissions
 import ai.zenkai.zenkai.common.TextMicAnimator
 import ai.zenkai.zenkai.common.extensions.hasPermission
+import ai.zenkai.zenkai.common.extensions.openUrl
 import ai.zenkai.zenkai.common.extensions.visible
 import ai.zenkai.zenkai.common.services.speech.AndroidSpeechService
-import ai.zenkai.zenkai.data.Message
-import ai.zenkai.zenkai.data.TextMessage
 import ai.zenkai.zenkai.i18n.S
 import ai.zenkai.zenkai.i18n.i18n
 import ai.zenkai.zenkai.i18n.supportedLanguage
+import ai.zenkai.zenkai.model.Message
+import ai.zenkai.zenkai.model.TextMessage
 import ai.zenkai.zenkai.presentation.messages.MessagesPresenter
 import ai.zenkai.zenkai.presentation.messages.MessagesView
 import ai.zenkai.zenkai.view.layout.ChatUI
@@ -22,6 +23,7 @@ import android.os.Bundle
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.view.View
 import me.carleslc.kotlin.extensions.standard.letIfTrue
 import org.jetbrains.anko.*
 import java.util.Locale
@@ -58,7 +60,7 @@ class ChatActivity : BaseActivity(), MessagesView {
         App.setLanguage(Locale.getDefault().supportedLanguage)
         fun RecyclerView.initMessages() {
             setHasFixedSize(true)
-            messagesAdapter = MessagesAdapter(attached = UI.messages)
+            messagesAdapter = MessagesAdapter(attached = UI.messages, onBotMessageClick = ::onMessageClick)
             adapter = messagesAdapter
             layoutManager = LinearLayoutManager(ctx)
             itemAnimator = DefaultItemAnimator()
@@ -107,6 +109,16 @@ class ChatActivity : BaseActivity(), MessagesView {
     override fun addAll(messages: Collection<Message>) {
         messagesAdapter.addAll(messages)
     }
+    
+    override fun onMessageInteraction(message: Message) {
+        presenter.onMessageInteraction(message)
+    }
+    
+    override fun openUrl(url: String) = ctx.openUrl(url)
+    
+    override fun share(title: String, content: String) = ctx.share(content, subject = title)
+    
+    private fun onMessageClick(message: Message) = onMessageInteraction(message)
     
     private fun onSend() {
         presenter.onNewMessage(TextMessage(UI.text))

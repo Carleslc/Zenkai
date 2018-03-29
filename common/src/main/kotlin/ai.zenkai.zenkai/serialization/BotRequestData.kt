@@ -1,3 +1,5 @@
-package ai.zenkai.zenkai.model
+package ai.zenkai.zenkai.serialization
 
-data class BotRequestData(val timezone: String, val tokens: List<Token>)
+import ai.zenkai.zenkai.model.Token
+
+data class BotRequestData(val timezone: String, val tokens: Collection<Token>)

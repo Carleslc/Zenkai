@@ -54,7 +54,7 @@ public class AIDialog {
     private final Handler handler;
 
     public interface AIDialogListener {
-        void onRequest(final String query, final AIRequest request, final RequestExtras requestExtras);
+        AIResponse onRequest(final String query, final AIRequest request, final RequestExtras requestExtras);
         void onResult(final AIResponse result);
         void onError(final AIError error);
         void onCancelled();
@@ -119,10 +119,11 @@ public class AIDialog {
     private void setAIButtonCallback(final AIButton aiButton) {
         aiButton.setResultsListener(new AIButton.AIButtonListener() {
             @Override
-            public void onRequest(String query, AIRequest request, RequestExtras requestExtras) {
+            public AIResponse onRequest(String query, AIRequest request, RequestExtras requestExtras) {
                 if (resultsListener != null) {
-                    resultsListener.onRequest(query, request, requestExtras);
+                    return resultsListener.onRequest(query, request, requestExtras);
                 }
+                return null;
             }
 
             @Override

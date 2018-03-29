@@ -6,19 +6,21 @@ import ai.api.model.AIRequest
 import ai.api.model.AIResponse
 import ai.zenkai.zenkai.common.IdGenerator
 import ai.zenkai.zenkai.common.services.bot.AndroidAIConfiguration
-import ai.zenkai.zenkai.data.VoiceMessage
+import ai.zenkai.zenkai.model.VoiceMessage
 import ai.zenkai.zenkai.exceptions.ListeningException
 import ai.zenkai.zenkai.i18n.S
 import ai.zenkai.zenkai.i18n.i18n
 import ai.zenkai.zenkai.i18n.locale
 import ai.zenkai.zenkai.services.bot.DialogFlowService
 import ai.zenkai.zenkai.services.speech.SpeechService
+import ai.zenkai.zenkai.services.speech.SpeechService.SpeakingListener.Factory.onFinish
 import android.content.Context
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.speech.tts.TextToSpeech
 import android.speech.tts.TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID
 import android.speech.tts.UtteranceProgressListener
+import kotlinx.coroutines.experimental.runBlocking
 import org.jetbrains.anko.*
 import kotlin.properties.Delegates.notNull
 
@@ -149,19 +151,22 @@ object AndroidSpeechService : SpeechService(), VoiceListener, AnkoLogger {
         listeningCallback?.onCancel()
     }
     
-    override fun onRequest(query: String, request: AIRequest, requestExtras: RequestExtras?) {
+    override fun onRequest(query: String, request: AIRequest, requestExtras: RequestExtras?): AIResponse? {
         listeningCallback?.onRequest(VoiceMessage(query))
-        DialogFlowService.fillParameters(request)
-    }
-    
-    override fun onResult(result: AIResponse) {
-        with (result.result) {
-            debug { "Received response for '${result.result.resolvedQuery}' on action " +
-                "${result.result.action} with status ${result.status.code}" }
-            listeningCallback?.onResults(DialogFlowService.getBotMessages(result))
-            listeningCallback = null
+        return runBlocking {
+            val result = DialogFlowService.ask(query, request)
+            val response = result.first
+            with (response.result) {
+                debug { "Received response for '${response.result.resolvedQuery}' on action " +
+                    "${response.result.action} with status ${response.status.code}" }
+                listeningCallback?.onResults(result.second)
+                listeningCallback = null
+            }
+            response
         }
     }
+    
+    override fun onResult(response: AIResponse) { /* Response intercepted above in onRequest */ }
     
     private fun Int.letTTSIfNoError(block: () -> Unit) {
         if (this != TextToSpeech.ERROR) {
@@ -171,7 +176,9 @@ object AndroidSpeechService : SpeechService(), VoiceListener, AnkoLogger {
         }
     }
     
+    @SuppressWarnings("deprecation")
     private fun speak(message: VoiceMessage) {
+        info { "Speaking: $message" }
         val id = utteranceIds.getNextString()
         speakingMessages[id] = message
         if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
@@ -182,15 +189,9 @@ object AndroidSpeechService : SpeechService(), VoiceListener, AnkoLogger {
     }
     
     private fun delaySpeakerEnabling() {
-        val last = pendingMessagesQueue.last()
-        last.speakingListener = SpeakingListener.merge(last.speakingListener, object : SpeakingListener {
-            override fun onSpeakCompleted() {
-                speakerEnabled = true
-            }
-            override fun onSpeakCancelled() {
-                speakerEnabled = true
-            }
-        })
+        pendingMessagesQueue.last().speakingListener = onFinish {
+            speakerEnabled = true
+        }
     }
     
     private fun idMap(id: String): HashMap<String, String> {

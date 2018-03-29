@@ -1,11 +1,11 @@
 package ai.zenkai.zenkai.services.speech
 
 import ai.zenkai.zenkai.common.Service
-import ai.zenkai.zenkai.data.BotMessage
-import ai.zenkai.zenkai.data.Message
-import ai.zenkai.zenkai.data.VoiceMessage
 import ai.zenkai.zenkai.exceptions.ListeningException
 import ai.zenkai.zenkai.i18n.SupportedLanguage
+import ai.zenkai.zenkai.model.BotMessage
+import ai.zenkai.zenkai.model.Message
+import ai.zenkai.zenkai.model.VoiceMessage
 import ai.zenkai.zenkai.services.ServicesProvider
 import klogging.KLoggerHolder
 import klogging.WithLogging
@@ -23,7 +23,7 @@ abstract class SpeechService: Service, WithLogging by KLoggerHolder() {
         if (speakerEnabled && !message.isEmpty()) {
             onSpeak(message)
         } else {
-            logger.debug { "[${this::class.simpleName}] Speaker is disabled for '${message.message}'" }
+            logger.info { "[${this::class.simpleName}] Speaker is disabled for '${message.message}'" }
             message.speakingListener?.onSpeakStarted()
             message.speakingListener?.onSpeakCancelled()
         }
@@ -37,10 +37,10 @@ abstract class SpeechService: Service, WithLogging by KLoggerHolder() {
     
     fun listen(callback: ListeningCallback) {
         if (microphoneEnabled) {
-            logger.debug { "[${this::class.simpleName}] Listening" }
+            logger.info { "[${this::class.simpleName}] Listening" }
             onListen(callback)
         } else {
-            logger.debug { "[${this::class.simpleName}] Cannot listen, microphone is disabled" }
+            logger.info { "[${this::class.simpleName}] Cannot listen, microphone is disabled" }
             callback.onCancel()
         }
     }
@@ -60,45 +60,68 @@ abstract class SpeechService: Service, WithLogging by KLoggerHolder() {
         fun onSpeakCompleted() { }
         fun onSpeakCancelled() { }
         
-        companion object Factory {
+        companion object Factory : WithLogging by KLoggerHolder() {
             
-            fun merge(message: VoiceMessage, new: SpeakingListener) {
-                message.speakingListener = merge(message.speakingListener, new)
-            }
-            
-            fun merge(old: SpeakingListener?, new: SpeakingListener): SpeakingListener {
+            fun merge(old: SpeakingListener, new: SpeakingListener): SpeakingListener {
+                logger.info { "[${this::class.simpleName}] Merge" }
                 return object : SpeakingListener {
                     override fun onSpeakStarted() {
-                        old?.onSpeakStarted()
+                        old.onSpeakStarted()
                         new.onSpeakStarted()
                     }
                     override fun onSpeakCompleted() {
-                        old?.onSpeakCompleted()
+                        old.onSpeakCompleted()
                         new.onSpeakCompleted()
                     }
                     override fun onSpeakCancelled() {
-                        old?.onSpeakCancelled()
+                        old.onSpeakCancelled()
                         new.onSpeakCancelled()
                     }
                 }
             }
             
-            fun performIfNoError(block: () -> Unit): SpeakingListener {
+            fun performOnce(onStart: () -> Unit, onFinish: () -> Unit): SpeakingListener {
                 return object : SpeakingListener {
                     private var spoken = false
                     override fun onSpeakStarted() {
-                        block()
-                        spoken = true
+                        onStart()
                     }
                     override fun onSpeakCancelled() {
-                        if (!spoken) block()
+                        logger.info { "[${this::class.simpleName}] Cancelled" }
+                        finish()
+                    }
+                    override fun onSpeakCompleted() {
+                        logger.info { "[${this::class.simpleName}] Completed" }
+                        finish()
+                    }
+                    private fun finish() {
+                        if (!spoken) {
+                            onFinish()
+                            spoken = true
+                        }
                     }
                 }
             }
             
-            fun performIfNoError(message: VoiceMessage, block: () -> Unit) {
-                merge(message, performIfNoError(block))
+            fun onCompleted(onCompleted: ()-> Unit): SpeakingListener {
+                return object : SpeakingListener {
+                    override fun onSpeakCompleted() {
+                        onCompleted()
+                    }
+                }
             }
+            
+            fun onFinish(completedOrCancelled: () -> Unit): SpeakingListener {
+                return object : SpeakingListener {
+                    override fun onSpeakCompleted() {
+                        completedOrCancelled()
+                    }
+                    override fun onSpeakCancelled() {
+                        completedOrCancelled()
+                    }
+                }
+            }
+            
         }
     }
     

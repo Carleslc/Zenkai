@@ -9,9 +9,9 @@ import ai.api.ui.AIDialog.AIDialogListener
 
 interface VoiceListener : AIDialogListener, AIButtonListener {
     
-    override fun onRequest(query: String, request: AIRequest, requestExtras: RequestExtras?)
+    override fun onRequest(query: String, request: AIRequest, requestExtras: RequestExtras?): AIResponse?
     
-    override fun onResult(result: AIResponse)
+    override fun onResult(response: AIResponse)
     
     override fun onError(error: AIError)
     

@@ -2,6 +2,8 @@ package ai.zenkai.zenkai.repositories
 
 interface DeviceSettings {
     
+    fun getAll(): Map<String, *>
+    
     operator fun get(id: String, default: Int = 0): Int
     
     operator fun get(id: String, default: String = ""): String

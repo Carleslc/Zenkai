@@ -19,5 +19,6 @@ enum class S {
     TIMEOUT,
     EMPTY_ANSWER,
     TRY_AGAIN,
-    SPEAK_NOW;
+    SPEAK_NOW,
+    SHARE;
 }

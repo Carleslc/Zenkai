@@ -1,5 +1,3 @@
-package ai.zenkai.zenkai.data
+package ai.zenkai.zenkai.model
 
-sealed class Token(val token: String, val type: String)
-
-class TrelloToken(token: String) : Token(token, "trello")
+data class Token(val type: String, val token: String)
