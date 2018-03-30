@@ -2,10 +2,11 @@ package ai.zenkai.zenkai.services.speech
 
 import ai.zenkai.zenkai.common.Provider
 import ai.zenkai.zenkai.model.VoiceMessage
-import klogging.KLoggerHolder
-import klogging.WithLogging
 
 open class DefaultSpeechService: SpeechService() {
+    override fun pause() {}
+    override fun resume() {}
+    override fun stop() {}
     
     override fun onListen(callback: ListeningCallback) {
         logger.info(DefaultSpeechService::class.simpleName + " cannot listen.")

@@ -1,7 +1,7 @@
 package ai.zenkai.zenkai.view
 
 import ai.zenkai.zenkai.BuildConfig
-import ai.zenkai.zenkai.common.HttpError
+import ai.zenkai.zenkai.common.extensions.longSnackbar
 import ai.zenkai.zenkai.common.extensions.snackbar
 import ai.zenkai.zenkai.presentation.BaseView
 import ai.zenkai.zenkai.presentation.Presenter
@@ -28,18 +28,26 @@ abstract class BaseActivity : AppCompatActivity(), BaseView, AnkoLogger {
     override fun show(message: String) {
         contentView?.snackbar(message) ?: toast(message)
     }
+    
+    private fun showLong(message: String) {
+        contentView?.longSnackbar(message) ?: longToast(message)
+    }
 
     override fun showError(error: Throwable) {
         logError(error)
-        val message = if (error is HttpError) {
-            "Error ${error.message}. Check your internet connection!"
-        } else {
-            error.message ?: "Error: ${error::class.simpleName}"
-        }
-        show(message)
+        showLong(error.message ?: "Error: ${error::class.simpleName}")
+    }
+    
+    override fun showError(message: String) {
+        logError(message)
+        showLong(message)
     }
 
     override fun logError(error: Throwable) {
         if (BuildConfig.DEBUG) error(error.message, error)
+    }
+    
+    private fun logError(message: String) {
+        if (BuildConfig.DEBUG) error(message)
     }
 }

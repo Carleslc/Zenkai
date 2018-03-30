@@ -20,5 +20,7 @@ enum class S {
     EMPTY_ANSWER,
     TRY_AGAIN,
     SPEAK_NOW,
-    SHARE;
+    SHARE,
+    NO_NETWORK,
+    NO_GREETINGS;
 }

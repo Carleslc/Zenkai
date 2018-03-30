@@ -7,7 +7,7 @@ import kotlinx.coroutines.experimental.Job
 
 abstract class BasePresenter : Presenter {
 
-    protected var jobs: MutableList<Job> = mutableListOf()
+    private var jobs: MutableList<Job> = mutableListOf()
     
     protected fun async(block: suspend CoroutineScope.() -> Unit) {
         jobs.add(doAsync(block))

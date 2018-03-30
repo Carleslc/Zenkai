@@ -1,3 +1,3 @@
 package ai.zenkai.zenkai.exceptions
 
-expect class ListeningException(message: String): Throwable
+class ListeningException actual constructor(message: String) : Throwable(message)

@@ -82,14 +82,14 @@ class ChatActivity : BaseActivity(), MessagesView {
     
     override fun onPause() {
         debug { "Pause" }
-        AndroidSpeechService.stop()
+        presenter.pause()
         super.onPause()
     }
     
     override fun onResume() {
         if (!firstResume) {
             debug { "Resume" }
-            presenter.onMicrophone()
+            presenter.resume()
         } else {
             firstResume = false
         }
@@ -98,7 +98,7 @@ class ChatActivity : BaseActivity(), MessagesView {
     
     override fun onDestroy() {
         debug { "Destroy" }
-        AndroidSpeechService.shutdown()
+        presenter.stop()
         super.onDestroy()
     }
     
@@ -114,6 +114,10 @@ class ChatActivity : BaseActivity(), MessagesView {
         presenter.onMessageInteraction(message)
     }
     
+    override fun clearInput() {
+        UI.text = ""
+    }
+    
     override fun openUrl(url: String) = ctx.openUrl(url)
     
     override fun share(title: String, content: String) = ctx.share(content, subject = title)
@@ -122,7 +126,6 @@ class ChatActivity : BaseActivity(), MessagesView {
     
     private fun onSend() {
         presenter.onNewMessage(TextMessage(UI.text))
-        UI.text = ""
     }
     
     private fun onMicrophone() {

@@ -4,6 +4,7 @@ import ai.zenkai.zenkai.common.Service
 import ai.zenkai.zenkai.exceptions.ListeningException
 import ai.zenkai.zenkai.i18n.SupportedLanguage
 import ai.zenkai.zenkai.model.BotMessage
+import ai.zenkai.zenkai.model.BotResult
 import ai.zenkai.zenkai.model.Message
 import ai.zenkai.zenkai.model.VoiceMessage
 import ai.zenkai.zenkai.services.ServicesProvider
@@ -33,6 +34,10 @@ abstract class SpeechService: Service, WithLogging by KLoggerHolder() {
         say(VoiceMessage(message))
     }
     
+    abstract fun pause()
+    abstract fun resume()
+    abstract fun stop()
+    
     protected abstract fun onSpeak(message: VoiceMessage)
     
     fun listen(callback: ListeningCallback) {
@@ -49,7 +54,7 @@ abstract class SpeechService: Service, WithLogging by KLoggerHolder() {
     
     interface ListeningCallback {
         fun onRequest(request: Message)
-        fun onResults(responses: List<BotMessage>)
+        fun onResults(responses: BotResult)
         fun onError(error: ListeningException)
         fun onCancel()
     }

@@ -13,6 +13,8 @@ interface MessagesView : BaseView {
     
     fun onMessageInteraction(message: Message)
     
+    fun clearInput()
+    
     fun openUrl(url: String): Boolean
     
     fun share(title: String, content: String): Boolean

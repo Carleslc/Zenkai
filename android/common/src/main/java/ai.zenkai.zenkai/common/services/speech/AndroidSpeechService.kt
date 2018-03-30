@@ -12,6 +12,7 @@ import ai.zenkai.zenkai.i18n.S
 import ai.zenkai.zenkai.i18n.i18n
 import ai.zenkai.zenkai.i18n.locale
 import ai.zenkai.zenkai.services.bot.DialogFlowService
+import ai.zenkai.zenkai.services.bot.DialogFlowService.NO_NETWORK
 import ai.zenkai.zenkai.services.speech.SpeechService
 import ai.zenkai.zenkai.services.speech.SpeechService.SpeakingListener.Factory.onFinish
 import android.content.Context
@@ -35,6 +36,7 @@ object AndroidSpeechService : SpeechService(), VoiceListener, AnkoLogger {
     private val speakingMessages by lazy { mutableMapOf<String, VoiceMessage>() }
     
     private var started = false
+    private var enabledOnPause = true
     
     private const val NO_INPUT = "Speech recognition engine error: No speech input."
     private const val NO_RESULT = "Speech recognition engine error: No recognition result matched."
@@ -98,9 +100,11 @@ object AndroidSpeechService : SpeechService(), VoiceListener, AnkoLogger {
         }
     }
     
-    fun stop() {
+    override fun pause() {
+        saveSpeakerState()
         UI.pause()
         TTS.stop()
+        debug { "TTS ($language) Stopping" }
         pendingMessagesQueue.forEach {
             it.speakingListener?.onSpeakStarted()
             it.speakingListener?.onSpeakCancelled()
@@ -113,11 +117,27 @@ object AndroidSpeechService : SpeechService(), VoiceListener, AnkoLogger {
         debug { "TTS ($language) Stopped" }
     }
     
-    fun shutdown() {
+    override fun resume() {
+        restoreSpeakerState()
+        UI.resume()
+        debug { "TTS ($language) Resumed" }
+    }
+    
+    override fun stop() {
         UI.close()
         TTS.shutdown()
         started = false
+        saveSpeakerState()
         debug { "TTS ($language) Shutdown" }
+    }
+    
+    private fun saveSpeakerState() {
+        enabledOnPause = speakerEnabled
+        speakerEnabled = false
+    }
+    
+    private fun restoreSpeakerState() {
+        speakerEnabled = enabledOnPause
     }
     
     override fun onSpeak(message: VoiceMessage) {
@@ -139,9 +159,10 @@ object AndroidSpeechService : SpeechService(), VoiceListener, AnkoLogger {
             error.message == NO_INPUT -> {}
             error.message == NO_RESULT -> UI.context.toast(i18n[S.TRY_AGAIN])
             else -> {
-                listeningCallback?.onError(ListeningException(error.toString()))
-                listeningCallback = null
                 UI.close()
+                val message = DialogFlowService.checkNetworkErrorMessage(error.message)
+                listeningCallback?.onError(ListeningException(message))
+                listeningCallback = null
             }
         }
     }

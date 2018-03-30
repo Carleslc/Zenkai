@@ -28,6 +28,8 @@ object SettingsRepository {
         readCurrentTokens()
     }
     
+    fun isNetworkAvailable() = deviceSettings.isNetworkAvailable()
+    
     private fun readCurrentTokens() {
         tokens = this.deviceSettings.getAll().filter { it.key.endsWith(TOKEN_SUFFIX) }.map {
             val type = it.key.removeSuffix(TOKEN_SUFFIX)
