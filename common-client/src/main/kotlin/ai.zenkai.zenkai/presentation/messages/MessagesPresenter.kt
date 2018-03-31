@@ -2,6 +2,7 @@ package ai.zenkai.zenkai.presentation.messages
 
 import ai.zenkai.zenkai.exceptions.ListeningException
 import ai.zenkai.zenkai.i18n.S
+import ai.zenkai.zenkai.i18n.i18n
 import ai.zenkai.zenkai.model.BotMessage
 import ai.zenkai.zenkai.model.BotResult
 import ai.zenkai.zenkai.model.Message
@@ -59,7 +60,7 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter(), WithLogging b
     private fun addSay(result: BotResult, lastListener: (VoiceMessage) -> Unit = {}) = with(result) {
         onResult()
         if (messages.isEmpty()) {
-            view.loading = false
+            UI { view.loading = false }
             return
         }
         logger.info { "[${this::class.simpleName}] Add Say" }
@@ -73,7 +74,7 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter(), WithLogging b
         logger.info { "[${this::class.simpleName}] Setting Mic Last Listener" }
         it.speakingListener = onCompleted {
             logger.info { "[${this::class.simpleName}] Mic" }
-            onMicrophone(true)
+            implicitMicrophone()
         }
     }
     
@@ -102,7 +103,7 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter(), WithLogging b
             }
         } else {
             view.loading = false
-            onMicrophone(true)
+            implicitMicrophone()
         }
         logger.info { "Presenter End Init" }
     }
@@ -113,15 +114,25 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter(), WithLogging b
             tokenLoginRequest = login!! // wait for a token
         } else if (isError()) {
             logger.error("Error ${error!!.message} with code ${error.status}")
-            view.showError(error.message)
-        } else if (tokenLoginRequest != null) {
+            UI { view.showError(i18n[S.INTERNAL_ERROR]) }
+            return
+        } else if (isWaitingForAToken()) {
             val type = tokenLoginRequest!!
             val token = tokens?.find { it.type == type }
             if (token != null) {
                 SettingsRepository.setToken(token)
+                tokenLoginRequest = null
             }
         }
         logger.info { "SUCCESS" }
+    }
+    
+    private fun isWaitingForAToken() : Boolean {
+        if (tokenLoginRequest != null) {
+            logger.info("Waiting for a token")
+            return true
+        }
+        return false
     }
     
     private fun canSendMessage(message: Message): Boolean {
@@ -147,8 +158,12 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter(), WithLogging b
         } else view.loading = false
     }
     
+    private fun implicitMicrophone() {
+        if (!isWaitingForAToken()) onMicrophone(true)
+    }
+    
     fun onMicrophone(request: Boolean = false) = UI {
-        logger.debug { "onMicrophone" }
+        logger.info { "onMicrophone" }
         if (!view.loading && view.hasMicrophonePermission(request)) {
             view.loading = true
             ServicesProvider.getSpeechService().listen(object : ListeningCallback {
@@ -157,6 +172,7 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter(), WithLogging b
                 }
                 
                 override fun onResults(responses: BotResult) {
+                    logger.debug { "onResults" }
                     addSayMic(responses)
                 }
                 

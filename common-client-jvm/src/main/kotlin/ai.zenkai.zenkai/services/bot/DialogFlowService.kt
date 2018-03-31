@@ -96,7 +96,7 @@ actual object DialogFlowService : BotService, WithLogging by KLoggerHolder() {
     override suspend fun getGreetings() = sendEvent("Greetings")
     
     suspend fun ask(originalQuery: String, request: AIRequest, setQuery: AIRequest.() -> Unit = {}) = repeatOnTimeout {
-        logger.debug { "[${this::class.simpleName}] Ask: $originalQuery" }
+        logger.info { "[${this::class.simpleName}] Ask: $originalQuery" }
         dataService.request(request.apply {
             setQuery()
             fillParameters(this)
@@ -125,7 +125,7 @@ actual object DialogFlowService : BotService, WithLogging by KLoggerHolder() {
     }
     
     private fun getBotResult(response: AIResponse): BotResult = with (response) {
-        logger.debug { "[${this::class.simpleName}] Response: ${gson.toJson(this)}" }
+        logger.info { "[${this::class.simpleName}] Response: ${gson.toJson(this)}" }
         val status = status
         if (status.code == PARTIAL_CONTENT) {
             logger.warn { "[${this::class.simpleName}] ${status.errorDetails}" }
@@ -133,12 +133,9 @@ actual object DialogFlowService : BotService, WithLogging by KLoggerHolder() {
                 return BotResult.timeout()
             }
         } else if (status.code == OK && result.metadata.isWebhookUsed) {
-            val result = getZenkaiResult()
-            if (result.messages.isNotEmpty()) {
-                return result
-            } else if (result.isError()) {
-                val messages = mutableListOf(BotMessage(result.error!!.message))
-                return BotResult(messages, false, result.error)
+            val zenkaiResult = getZenkaiResult()
+            if (!zenkaiResult.messages.isEmpty() || zenkaiResult.isError()) {
+                return zenkaiResult
             }
         }
         return BotResult.success(dialogFlowMessages())
@@ -163,7 +160,7 @@ actual object DialogFlowService : BotService, WithLogging by KLoggerHolder() {
         val data = result.fulfillment.data?.get("zenkai")
         if (data != null) {
             val response = gson.fromJson(data.asJsonObject, BotResponse::class.java)
-            logger.debug { "Response: $response" }
+            logger.info { "Response: $response" }
             val messages = response.messages.orEmpty().mapToMutableList {
                 BotMessage(text = it.displayText.orEmpty(), speech = it.textToSpeech.orEmpty())
             }

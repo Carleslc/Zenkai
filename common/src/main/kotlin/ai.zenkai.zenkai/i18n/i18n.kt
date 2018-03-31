@@ -22,5 +22,6 @@ enum class S {
     SPEAK_NOW,
     SHARE,
     NO_NETWORK,
-    NO_GREETINGS;
+    NO_GREETINGS,
+    INTERNAL_ERROR;
 }

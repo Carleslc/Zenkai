@@ -32,6 +32,5 @@ class MessagesRepositoryImpl: MessagesRepository, WithLogging by KLoggerHolder()
         session.add(message)
     }
     
-    // TODO get all previous messages from Firebase Database
     override suspend fun getHistory() = session
 }

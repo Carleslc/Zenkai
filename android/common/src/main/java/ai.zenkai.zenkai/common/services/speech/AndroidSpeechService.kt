@@ -6,13 +6,12 @@ import ai.api.model.AIRequest
 import ai.api.model.AIResponse
 import ai.zenkai.zenkai.common.IdGenerator
 import ai.zenkai.zenkai.common.services.bot.AndroidAIConfiguration
-import ai.zenkai.zenkai.model.VoiceMessage
 import ai.zenkai.zenkai.exceptions.ListeningException
 import ai.zenkai.zenkai.i18n.S
 import ai.zenkai.zenkai.i18n.i18n
 import ai.zenkai.zenkai.i18n.locale
+import ai.zenkai.zenkai.model.VoiceMessage
 import ai.zenkai.zenkai.services.bot.DialogFlowService
-import ai.zenkai.zenkai.services.bot.DialogFlowService.NO_NETWORK
 import ai.zenkai.zenkai.services.speech.SpeechService
 import ai.zenkai.zenkai.services.speech.SpeechService.SpeakingListener.Factory.onFinish
 import android.content.Context
@@ -199,7 +198,7 @@ object AndroidSpeechService : SpeechService(), VoiceListener, AnkoLogger {
     
     @SuppressWarnings("deprecation")
     private fun speak(message: VoiceMessage) {
-        info { "Speaking: $message" }
+        debug { "Speaking: $message" }
         val id = utteranceIds.getNextString()
         speakingMessages[id] = message
         if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
