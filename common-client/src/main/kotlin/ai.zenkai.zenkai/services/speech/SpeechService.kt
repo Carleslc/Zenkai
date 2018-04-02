@@ -53,7 +53,7 @@ abstract class SpeechService: Service, WithLogging by KLoggerHolder() {
     protected abstract fun onListen(callback: ListeningCallback)
     
     interface ListeningCallback {
-        fun onRequest(request: Message)
+        fun onRequest(request: Message): String?
         fun onResults(responses: BotResult)
         fun onError(error: ListeningException)
         fun onCancel()

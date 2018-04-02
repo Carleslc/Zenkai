@@ -1,5 +1,6 @@
 package ai.zenkai.zenkai.presentation.messages
 
+import ai.zenkai.zenkai.model.Token
 import ai.zenkai.zenkai.exceptions.ListeningException
 import ai.zenkai.zenkai.i18n.S
 import ai.zenkai.zenkai.i18n.i18n
@@ -10,8 +11,6 @@ import ai.zenkai.zenkai.model.VoiceMessage
 import ai.zenkai.zenkai.presentation.BasePresenter
 import ai.zenkai.zenkai.repositories.MessagesRepository
 import ai.zenkai.zenkai.repositories.RepositoriesProvider
-import ai.zenkai.zenkai.repositories.SettingsRepository
-import ai.zenkai.zenkai.serialization.BotError
 import ai.zenkai.zenkai.services.ServicesProvider
 import ai.zenkai.zenkai.services.speech.SpeechService.ListeningCallback
 import ai.zenkai.zenkai.services.speech.SpeechService.SpeakingListener.Factory.onCompleted
@@ -24,7 +23,7 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter(), WithLogging b
     
     private val repository by MessagesRepository.lazyGet()
     
-    private var tokenLoginRequest: String? = null
+    private var tokenLoginRequest: Token? = null
     
     private fun lastInteraction(message: VoiceMessage) {
         message.speakingListener = onFinish {
@@ -98,7 +97,7 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter(), WithLogging b
         addSay(greetings)
         ServicesProvider.getSpeechService().speakerEnabled = true
         if (firstTime) {
-            if (!greetings.isError()) {
+            if (!greetings.isError() || greetings.isLoginError()) {
                 RepositoriesProvider.getSettingsRepository().setFirstTime()
             }
         } else {
@@ -116,11 +115,9 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter(), WithLogging b
             logger.error("Error ${error!!.message} with code ${error.status}")
             UI { view.showError(i18n[S.INTERNAL_ERROR]) }
             return
-        } else if (isWaitingForAToken()) {
-            val type = tokenLoginRequest!!
-            val token = tokens?.find { it.type == type }
-            if (token != null) {
-                SettingsRepository.setToken(token)
+        } else if (tokens != null && isWaitingForAToken()) {
+            val validToken = tokens.find { it.type == tokenLoginRequest!!.type }
+            if (validToken != null) {
                 tokenLoginRequest = null
             }
         }
@@ -137,7 +134,7 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter(), WithLogging b
     
     private fun canSendMessage(message: Message): Boolean {
         if (!message.isEmpty()) {
-            if (!SettingsRepository.isNetworkAvailable()) {
+            if (!RepositoriesProvider.getSettingsRepository().isNetworkAvailable()) {
                 view.show(S.NO_NETWORK)
                 return false
             }
@@ -146,20 +143,36 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter(), WithLogging b
         return false
     }
     
+    private fun preprocessMessage(request: Message): String? {
+        add(request)
+        if (isWaitingForAToken()) {
+            val token = tokenLoginRequest!!
+            if (request.message.matches(token.regex.toRegex())) {
+                token.token = request.message
+                RepositoriesProvider.getSettingsRepository().setToken(token)
+                return token.loginEvent
+            }
+        }
+        return null
+    }
+    
     fun onNewMessage(request: Message) {
         if (canSendMessage(request)) {
             logger.info { "Can send messages" }
             view.loading = true
             view.clearInput()
-            add(request)
+            val event = preprocessMessage(request)
             async {
-                addSay(ServicesProvider.getBotService().ask(request))
+                val result = if (event != null) {
+                    ServicesProvider.getBotService().sendEvent(event)
+                } else ServicesProvider.getBotService().ask(request)
+                addSay(result)
             }
         } else view.loading = false
     }
     
     private fun implicitMicrophone() {
-        if (!isWaitingForAToken()) onMicrophone(true)
+        if (!isWaitingForAToken()) onMicrophone()
     }
     
     fun onMicrophone(request: Boolean = false) = UI {
@@ -167,8 +180,8 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter(), WithLogging b
         if (!view.loading && view.hasMicrophonePermission(request)) {
             view.loading = true
             ServicesProvider.getSpeechService().listen(object : ListeningCallback {
-                override fun onRequest(request: Message) {
-                    add(request)
+                override fun onRequest(request: Message): String? {
+                    return preprocessMessage(request)
                 }
                 
                 override fun onResults(responses: BotResult) {
@@ -197,7 +210,7 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter(), WithLogging b
     fun resume() {
         logger.info { "Resume Presenter" }
         ServicesProvider.getSpeechService().resume()
-        onMicrophone()
+        implicitMicrophone()
     }
     
     fun stop() {
@@ -210,6 +223,8 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter(), WithLogging b
             if (!view.openUrl(message.text.message)) {
                 view.share("", message.share())
             }
+        } else {
+            view.copyToClipboard("Zenkai Chat Message", message.message)
         }
     }
     
@@ -217,7 +232,7 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter(), WithLogging b
         logger.info { "[${MessagesPresenter@ this::class.simpleName}] Microphone Permission, allowed = $allowed" }
         ServicesProvider.getSpeechService().microphoneEnabled = allowed
         if (allowed) {
-            onMicrophone(true)
+            onMicrophone()
         } else {
             view.loading = false
             view.show(S.MICROPHONE_DISABLED)

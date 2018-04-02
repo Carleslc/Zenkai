@@ -84,16 +84,19 @@ actual object DialogFlowService : BotService, WithLogging by KLoggerHolder() {
         return doAsync { getBotMessages() }.await()
     }
     
-    override suspend fun sendEvent(name: String, data: Map<String, String>?): BotResult = repeatOnTimeout {
+    suspend fun sendEventForResponse(name: String, data: Map<String, String>? = null): Pair<AIResponse, BotResult> = repeatOnTimeout {
+        logger.info { "Sending event $name" }
         dataService.request(AIRequest().apply {
             setEvent(AIEvent(name).apply {
                 setData(data)
             })
             fillParameters(this)
         })
-    }.second
+    }
     
-    override suspend fun getGreetings() = sendEvent("Greetings")
+    override suspend fun sendEvent(name: String, data: Map<String, String>?) = sendEventForResponse(name, data).second
+    
+    override suspend fun getGreetings() = sendEvent(GREETINGS_EVENT)
     
     suspend fun ask(originalQuery: String, request: AIRequest, setQuery: AIRequest.() -> Unit = {}) = repeatOnTimeout {
         logger.info { "[${this::class.simpleName}] Ask: $originalQuery" }

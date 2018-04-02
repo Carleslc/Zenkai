@@ -19,6 +19,8 @@ interface MessagesView : BaseView {
     
     fun share(title: String, content: String): Boolean
     
+    fun copyToClipboard(label: String, text: String)
+    
     fun hasMicrophonePermission(request: Boolean = false): Boolean
     
 }

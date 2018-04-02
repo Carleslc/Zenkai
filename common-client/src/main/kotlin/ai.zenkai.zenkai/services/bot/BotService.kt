@@ -6,6 +6,8 @@ import ai.zenkai.zenkai.model.BotResult
 import ai.zenkai.zenkai.model.Message
 import ai.zenkai.zenkai.serialization.BotError
 
+const val GREETINGS_EVENT = "Greetings"
+
 interface BotService : Service {
     
     var language: SupportedLanguage

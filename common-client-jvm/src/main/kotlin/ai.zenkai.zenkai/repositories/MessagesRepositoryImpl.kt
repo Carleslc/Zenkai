@@ -18,9 +18,11 @@ class MessagesRepositoryImpl: MessagesRepository, WithLogging by KLoggerHolder()
         val greetings = if (needGreetings) {
             logger.info { "[${this::class.simpleName}] Greetings!" }
             val greetings = ServicesProvider.getBotService().getGreetings()
-            if (greetings.isError()) {
-                val fallbackMessages = i18n[S.NO_GREETINGS].split('\n')
-                fallbackMessages.forEach { greetings.messages.add(BotMessage(it)) }
+            if (greetings.messages.isEmpty()) {
+                greetings.messages.add(BotMessage(i18n[S.NO_GREETINGS]))
+                if (!RepositoriesProvider.getSettingsRepository().isNetworkAvailable()) {
+                    greetings.messages.add(BotMessage(i18n[S.NO_NETWORK_GREETINGS]))
+                }
             }
             greetings
         } else BotResult.empty()

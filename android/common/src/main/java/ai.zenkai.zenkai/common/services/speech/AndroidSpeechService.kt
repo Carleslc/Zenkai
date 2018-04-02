@@ -10,7 +10,9 @@ import ai.zenkai.zenkai.exceptions.ListeningException
 import ai.zenkai.zenkai.i18n.S
 import ai.zenkai.zenkai.i18n.i18n
 import ai.zenkai.zenkai.i18n.locale
+import ai.zenkai.zenkai.model.BotResult
 import ai.zenkai.zenkai.model.VoiceMessage
+import ai.zenkai.zenkai.services.ServicesProvider
 import ai.zenkai.zenkai.services.bot.DialogFlowService
 import ai.zenkai.zenkai.services.speech.SpeechService
 import ai.zenkai.zenkai.services.speech.SpeechService.SpeakingListener.Factory.onFinish
@@ -172,9 +174,11 @@ object AndroidSpeechService : SpeechService(), VoiceListener, AnkoLogger {
     }
     
     override fun onRequest(query: String, request: AIRequest, requestExtras: RequestExtras?): AIResponse? {
-        listeningCallback?.onRequest(VoiceMessage(query))
+        val event = listeningCallback?.onRequest(VoiceMessage(query))
         return runBlocking {
-            val result = DialogFlowService.ask(query, request)
+            val result = if (event != null) {
+                DialogFlowService.sendEventForResponse(event)
+            } else DialogFlowService.ask(query, request)
             val response = result.first
             with (response.result) {
                 debug { "Received response for '${response.result.resolvedQuery}' on action " +
