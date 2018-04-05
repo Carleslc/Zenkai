@@ -26,6 +26,7 @@ import android.os.Bundle
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import klogging.KLogger
 import me.carleslc.kotlin.extensions.standard.letIfTrue
 import org.jetbrains.anko.*
 import java.util.Locale
@@ -120,7 +121,9 @@ class ChatActivity : BaseActivity(), MessagesView {
         UI.text = ""
     }
     
-    override fun openUrl(url: String) = ctx.openUrl(url)
+    override fun openUrl(text: String): Boolean {
+        return ctx.openUrl(text, this)
+    }
     
     override fun share(title: String, content: String) = ctx.share(content, subject = title)
     
