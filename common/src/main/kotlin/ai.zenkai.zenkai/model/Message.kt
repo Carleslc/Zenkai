@@ -5,7 +5,7 @@ import ai.zenkai.zenkai.i18n.i18n.formatEmojis
 
 abstract class Message(message: String) {
     
-    val message = message.trim().formatEmojis()
+    val message = message.trim().capitalize().formatEmojis()
     
     val date = DateTime.now()
     

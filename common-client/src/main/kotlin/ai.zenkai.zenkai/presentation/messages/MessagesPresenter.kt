@@ -176,7 +176,6 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter(), WithLogging b
     
     fun onNewMessage(request: Message) {
         if (canSendMessage(request)) {
-            logger.info { "Can send messages" }
             loading = true
             view.clearInput()
             val event = preprocessMessage(request)
