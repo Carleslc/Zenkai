@@ -1,5 +1,7 @@
 package ai.zenkai.zenkai.presentation.messages
 
+import ai.zenkai.zenkai.common.delay
+import ai.zenkai.zenkai.common.doAsync
 import ai.zenkai.zenkai.model.Token
 import ai.zenkai.zenkai.exceptions.ListeningException
 import ai.zenkai.zenkai.i18n.S
@@ -237,8 +239,13 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter(), WithLogging b
     
     fun onMessageInteraction(message: Message) {
         if (message is BotMessage) {
+            ServicesProvider.getSpeechService().microphoneEnabled = false
             if (!view.openUrl(message.text.message)) {
                 view.share("", message.share())
+            }
+            doAsync { // keep disabled while opening url or sharing (paused app UI)
+                delay(1000)
+                ServicesProvider.getSpeechService().microphoneEnabled = true
             }
         } else {
             view.copyToClipboard("Zenkai Chat Message", message.message)
