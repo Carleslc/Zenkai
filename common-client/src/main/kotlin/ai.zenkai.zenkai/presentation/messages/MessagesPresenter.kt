@@ -2,13 +2,14 @@ package ai.zenkai.zenkai.presentation.messages
 
 import ai.zenkai.zenkai.common.delay
 import ai.zenkai.zenkai.common.doAsync
-import ai.zenkai.zenkai.model.Token
 import ai.zenkai.zenkai.exceptions.ListeningException
 import ai.zenkai.zenkai.i18n.S
 import ai.zenkai.zenkai.i18n.i18n
 import ai.zenkai.zenkai.model.BotMessage
 import ai.zenkai.zenkai.model.BotResult
 import ai.zenkai.zenkai.model.Message
+import ai.zenkai.zenkai.model.TextMessage
+import ai.zenkai.zenkai.model.Token
 import ai.zenkai.zenkai.model.VoiceMessage
 import ai.zenkai.zenkai.presentation.BasePresenter
 import ai.zenkai.zenkai.repositories.MessagesRepository
@@ -99,7 +100,11 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter(), WithLogging b
     
     private fun add(message: Message) {
         if (message.message.isNotBlank()) {
-            view.add(message)
+            val uiMessage = when (message) {
+                !is BotMessage -> TextMessage(message.message.capitalize())
+                else -> message
+            }
+            view.add(uiMessage)
         }
         if (!message.isEmpty()) {
             async { repository.add(message) }
@@ -176,7 +181,7 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter(), WithLogging b
         return null
     }
     
-    fun onNewMessage(request: Message) {
+    fun onNewMessage(request: TextMessage) {
         if (canSendMessage(request)) {
             loading = true
             view.clearInput()
@@ -199,7 +204,7 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter(), WithLogging b
         if (!loading && view.hasMicrophonePermission(request)) {
             loading = true
             ServicesProvider.getSpeechService().listen(object : ListeningCallback {
-                override fun onRequest(request: Message): String? {
+                override fun onRequest(request: VoiceMessage): String? {
                     return preprocessMessage(request)
                 }
                 
