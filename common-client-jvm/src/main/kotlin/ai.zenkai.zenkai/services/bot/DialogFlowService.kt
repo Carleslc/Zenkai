@@ -35,7 +35,6 @@ import kotlin.properties.Delegates.notNull
 
 actual object DialogFlowService : BotService, WithLogging by KLoggerHolder() {
     
-    private const val REPEAT_TIMEOUT_REQUEST_LIMIT = 1
     private const val PARTIAL_CONTENT = 206
     private const val OK = 200
     
@@ -60,16 +59,18 @@ actual object DialogFlowService : BotService, WithLogging by KLoggerHolder() {
         this.provider = provider
     }
     
-    private suspend fun repeatOnTimeout(request: () -> AIResponse): Pair<AIResponse, BotResult> {
+    private suspend fun repeatOnTimeout(repetitions: Int = REPEAT_TIMEOUT_REQUEST_LIMIT,
+        overrideTimeoutMessages: Boolean = true,
+        request: () -> AIResponse): Pair<AIResponse, BotResult> {
         var timeoutCounter = 0
         
-        fun BotResult.isTimeout() = timeout && ++timeoutCounter <= REPEAT_TIMEOUT_REQUEST_LIMIT
+        fun BotResult.isTimeout() = timeout && ++timeoutCounter <= repetitions
         
         fun getBotMessages(): Pair<AIResponse, BotResult> {
             logger.info { "Getting Bot Messages" }
             try {
                 val response = request()
-                with(getBotResult(response)) {
+                with(getBotResult(response, overrideTimeoutMessages)) {
                     if (isTimeout()) return getBotMessages()
                     return response to this
                 }
@@ -84,7 +85,9 @@ actual object DialogFlowService : BotService, WithLogging by KLoggerHolder() {
         return doAsync { getBotMessages() }.await()
     }
     
-    suspend fun sendEventForResponse(name: String, data: Map<String, String>? = null): Pair<AIResponse, BotResult> = repeatOnTimeout {
+    suspend fun sendEventForResponse(name: String, data: Map<String, String>? = null,
+        repetitionsOnTimeout: Int = REPEAT_TIMEOUT_REQUEST_LIMIT,
+        overrideTimeoutMessages: Boolean = true): Pair<AIResponse, BotResult> = repeatOnTimeout(repetitionsOnTimeout, overrideTimeoutMessages) {
         logger.info { "Sending event $name" }
         dataService.request(AIRequest().apply {
             setEvent(AIEvent(name).apply {
@@ -94,9 +97,10 @@ actual object DialogFlowService : BotService, WithLogging by KLoggerHolder() {
         })
     }
     
-    override suspend fun sendEvent(name: String, data: Map<String, String>?) = sendEventForResponse(name, data).second
+    override suspend fun sendEvent(name: String, data: Map<String, String>?,
+        repetitionsOnTimeout: Int, overrideTimeoutMessages: Boolean) = sendEventForResponse(name, data, repetitionsOnTimeout, overrideTimeoutMessages).second
     
-    override suspend fun getGreetings() = sendEvent(GREETINGS_EVENT)
+    override suspend fun getGreetings() = sendEvent(GREETINGS_EVENT, repetitionsOnTimeout=0, overrideTimeoutMessages=false)
     
     suspend fun ask(originalQuery: String, request: AIRequest, setQuery: AIRequest.() -> Unit = {}) = repeatOnTimeout {
         logger.info { "[${this::class.simpleName}] Ask: $originalQuery" }
@@ -127,12 +131,12 @@ actual object DialogFlowService : BotService, WithLogging by KLoggerHolder() {
         }
     }
     
-    private fun getBotResult(response: AIResponse): BotResult = with (response) {
+    private fun getBotResult(response: AIResponse, overrideTimeoutMessages: Boolean = true): BotResult = with (response) {
         logger.info { "[${this::class.simpleName}] Response: ${gson.toJson(this)}" }
         val status = status
         if (status.code == PARTIAL_CONTENT) {
             logger.warn { "[${this::class.simpleName}] ${status.errorDetails}" }
-            if ("timeout" in status.errorDetails) {
+            if (overrideTimeoutMessages && "timeout" in status.errorDetails) {
                 return BotResult.timeout()
             }
         } else if (status.code == OK && result.metadata.isWebhookUsed) {

@@ -17,11 +17,15 @@ class MessagesRepositoryImpl: MessagesRepository, WithLogging by KLoggerHolder()
     override suspend fun greetings(): BotResult {
         val greetings = if (needGreetings) {
             logger.info { "[${this::class.simpleName}] Greetings!" }
-            val greetings = ServicesProvider.getBotService().getGreetings()
-            if (greetings.messages.isEmpty()) {
-                greetings.messages.add(BotMessage(i18n[S.NO_GREETINGS]))
-                if (!RepositoriesProvider.getSettingsRepository().isNetworkAvailable()) {
-                    greetings.messages.add(BotMessage(i18n[S.NO_NETWORK_GREETINGS]))
+            var greetings = BotResult.empty()
+            if (!RepositoriesProvider.getSettingsRepository().isNetworkAvailable()) {
+                greetings.messages.add(BotMessage(i18n[S.NO_NETWORK_GREETINGS]))
+            } else {
+                val botGreetings = ServicesProvider.getBotService().getGreetings()
+                if (botGreetings.messages.isEmpty()) {
+                    greetings.messages.add(BotMessage(i18n[S.NO_GREETINGS]))
+                } else {
+                    greetings = botGreetings
                 }
             }
             greetings

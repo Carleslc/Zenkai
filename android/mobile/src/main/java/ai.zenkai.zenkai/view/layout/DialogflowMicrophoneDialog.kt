@@ -7,6 +7,7 @@ import ai.zenkai.zenkai.common.services.speech.VoiceUI
 import ai.zenkai.zenkai.presentation.BaseView
 import ai.zenkai.zenkai.view.BaseActivity
 import android.content.Context
+import me.carleslc.kotlin.extensions.standard.isNotNull
 import org.jetbrains.anko.*
 
 class DialogflowMicrophoneDialog(override val context: Context, override val view: BaseView) : VoiceUI, AnkoLogger {
@@ -39,7 +40,7 @@ class DialogflowMicrophoneDialog(override val context: Context, override val vie
         }
     }
     
-    override fun isShown() = mic?.dialog?.isShowing ?: false
+    override fun isShown() = mic.isNotNull()
     
     override fun pause() {
         if (isShown()) {

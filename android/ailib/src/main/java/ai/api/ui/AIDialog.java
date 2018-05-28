@@ -26,12 +26,12 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import ai.api.RequestExtras;
-import ai.api.android.AIConfiguration;
-import ai.api.android.AIService;
 import ai.api.AIServiceException;
 import ai.api.PartialResultsListener;
 import ai.api.R;
+import ai.api.RequestExtras;
+import ai.api.android.AIConfiguration;
+import ai.api.android.AIService;
 import ai.api.model.AIError;
 import ai.api.model.AIRequest;
 import ai.api.model.AIResponse;
@@ -74,11 +74,11 @@ public class AIDialog {
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(customLayout);
 
-        partialResultsTextView = (TextView) dialog.findViewById(R.id.partialResultsTextView);
-        title = (TextView) dialog.findViewById(R.id.titleTextView);
+        partialResultsTextView = dialog.findViewById(R.id.partialResultsTextView);
+        title = dialog.findViewById(R.id.titleTextView);
         title.setText(i18n.INSTANCE.get(S.SPEAK_NOW));
 
-        aiButton = (AIButton) dialog.findViewById(R.id.micButton);
+        aiButton = dialog.findViewById(R.id.micButton);
         aiButton.initialize(config);
         setAIButtonCallback(aiButton);
     }
