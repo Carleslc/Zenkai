@@ -6,6 +6,7 @@ import ai.zenkai.zenkai.R.string
 import ai.zenkai.zenkai.common.AndroidPermissions
 import ai.zenkai.zenkai.common.TextMicAnimator
 import ai.zenkai.zenkai.common.extensions.hasPermission
+import ai.zenkai.zenkai.common.extensions.hideKeyboard
 import ai.zenkai.zenkai.common.extensions.openUrl
 import ai.zenkai.zenkai.common.extensions.visible
 import ai.zenkai.zenkai.common.services.speech.AndroidSpeechService
@@ -97,6 +98,7 @@ class ChatActivity : BaseActivity(), MessagesView {
             firstResume = false
         }
         super.onResume()
+        messagesAdapter.scrollToBottom()
     }
     
     override fun onDestroy() {
@@ -139,6 +141,7 @@ class ChatActivity : BaseActivity(), MessagesView {
     
     private fun onSend() {
         presenter.onNewMessage(TextMessage(UI.text))
+        hideKeyboard(this)
     }
     
     private fun onMicrophone() {

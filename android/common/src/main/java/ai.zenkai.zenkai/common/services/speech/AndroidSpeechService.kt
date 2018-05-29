@@ -10,6 +10,8 @@ import ai.zenkai.zenkai.exceptions.ListeningException
 import ai.zenkai.zenkai.i18n.S
 import ai.zenkai.zenkai.i18n.i18n
 import ai.zenkai.zenkai.i18n.locale
+import ai.zenkai.zenkai.model.BotResult
+import ai.zenkai.zenkai.model.BotResult.Factory
 import ai.zenkai.zenkai.model.VoiceMessage
 import ai.zenkai.zenkai.services.bot.DialogFlowService
 import ai.zenkai.zenkai.services.speech.SpeechService
@@ -184,7 +186,10 @@ object AndroidSpeechService : SpeechService(), VoiceListener, AnkoLogger {
                 DialogFlowService.sendEventForResponse(event)
             } else DialogFlowService.ask(query, request)
             val response = result.first
-            with (response.result) {
+            if (result.second.isError() && !result.second.isLoginError()) {
+                listeningCallback?.onError(ListeningException(result.second.error!!.message))
+                listeningCallback = null
+            } else with (response.result) {
                 debug { "Received response for '${response.result.resolvedQuery}' on action " +
                     "${response.result.action} with status ${response.status.code}" }
                 listeningCallback?.onResults(result.second)

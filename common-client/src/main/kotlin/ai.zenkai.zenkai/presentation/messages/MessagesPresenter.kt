@@ -157,15 +157,12 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter(), WithLogging b
         return false
     }
     
-    private fun canSendMessage(message: Message): Boolean {
-        if (!message.isEmpty()) {
-            if (!RepositoriesProvider.getSettingsRepository().isNetworkAvailable()) {
-                view.show(S.NO_NETWORK)
-                return false
-            }
-            return true
+    private fun isNetworkAvailable(): Boolean {
+        if (!RepositoriesProvider.getSettingsRepository().isNetworkAvailable()) {
+            view.show(S.NO_NETWORK)
+            return false
         }
-        return false
+        return true
     }
     
     private fun preprocessMessage(request: Message): String? {
@@ -182,7 +179,7 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter(), WithLogging b
     }
     
     fun onNewMessage(request: TextMessage) {
-        if (canSendMessage(request)) {
+        if (!request.isEmpty() && isNetworkAvailable()) {
             loading = true
             view.clearInput()
             val event = preprocessMessage(request)
@@ -214,12 +211,14 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter(), WithLogging b
                 }
                 
                 override fun onError(error: ListeningException) {
-                    view.showError(error)
+                    if (isNetworkAvailable()) {
+                        view.showError(error)
+                    }
                     loading = false
                 }
                 
                 override fun onCancel() {
-                    logger.info { "[${MessagesPresenter@ this::class.simpleName}] Microphone Cancelled" }
+                    logger.info { "[${MessagesPresenter@this::class.simpleName}] Microphone Cancelled" }
                     loading = false
                 }
             })
