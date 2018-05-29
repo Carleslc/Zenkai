@@ -1,10 +1,15 @@
 package ai.zenkai.zenkai.repositories
 
 import ai.zenkai.zenkai.model.Token
+import ai.zenkai.zenkai.services.bot.GREETINGS_EVENT
+import klogging.KLoggerHolder
+import klogging.WithLogging
 
-object SettingsRepository {
+object SettingsRepository : WithLogging by KLoggerHolder() {
     
     const val TOKEN_SUFFIX = "-token"
+    const val EVENT_SUFFIX = "-event"
+    const val REGEX_SUFFIX = "-regex"
     
     private lateinit var tokens: MutableMap<String, Token>
     
@@ -17,7 +22,10 @@ object SettingsRepository {
     }
     
     fun setToken(update: Token) = with(update) {
-        deviceSettings[type + TOKEN_SUFFIX] = token
+        logger.info { "Update token $type to $token" }
+        deviceSettings[type + TOKEN_SUFFIX] = token!!
+        deviceSettings[type + EVENT_SUFFIX] = loginEvent
+        deviceSettings[type + REGEX_SUFFIX] = regex
         tokens[type] = update
     }
     
@@ -33,7 +41,9 @@ object SettingsRepository {
     private fun readCurrentTokens() {
         tokens = this.deviceSettings.getAll().filter { it.key.endsWith(TOKEN_SUFFIX) }.map {
             val type = it.key.removeSuffix(TOKEN_SUFFIX)
-            type to Token(type, it.value.toString())
+            val event = this.deviceSettings[type + EVENT_SUFFIX, GREETINGS_EVENT]
+            val regex = this.deviceSettings[type + REGEX_SUFFIX, ".*"]
+            type to Token(type, it.value?.toString(), regex, event)
         }.toMap(mutableMapOf())
     }
     

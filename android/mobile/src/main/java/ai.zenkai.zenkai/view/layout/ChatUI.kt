@@ -3,8 +3,6 @@ package ai.zenkai.zenkai.view.layout
 import ai.zenkai.zenkai.R
 import ai.zenkai.zenkai.common.extensions.elevate
 import ai.zenkai.zenkai.common.extensions.margin
-import ai.zenkai.zenkai.i18n.S
-import ai.zenkai.zenkai.i18n.i18n
 import ai.zenkai.zenkai.view.ChatActivity
 import android.graphics.drawable.Drawable
 import android.support.v4.content.ContextCompat.getDrawable

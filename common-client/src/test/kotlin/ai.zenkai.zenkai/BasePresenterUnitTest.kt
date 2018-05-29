@@ -1,7 +1,7 @@
 package ai.zenkai.zenkai
 
 import kotlinx.coroutines.experimental.Job
-import org.zenkai.presentation.BasePresenter
+import ai.zenkai.zenkai.presentation.BasePresenter
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
@@ -13,7 +13,7 @@ class BasePresenterUnitTest: BaseUnitTest() {
         val jobs = (1..10).map { makeJob() }
         val presenter = object : BasePresenter() {
             fun addJobs(jobs: List<Job>) {
-                this.jobs += jobs
+                this.jobs.addAll(jobs)
             }
         }
         presenter.addJobs(jobs)

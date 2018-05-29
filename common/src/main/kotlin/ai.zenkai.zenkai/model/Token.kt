@@ -1,3 +1,6 @@
 package ai.zenkai.zenkai.model
 
-data class Token(val type: String, val token: String)
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class Token(val type: String, var token: String?, val regex: String, val loginEvent: String)

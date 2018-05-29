@@ -7,15 +7,24 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Patterns
+import org.jetbrains.anko.*
 
 val Context.notificationManager: NotificationManager
     get() = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-fun Context.openUrl(url: String?): Boolean {
-    if (url.isNullOrBlank() || !Patterns.WEB_URL.matcher(url).matches()) return false
-    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-    if (browserIntent.resolveActivity(packageManager) != null) {
-        startActivity(browserIntent)
+fun Context.openUrl(text: String?, logger: AnkoLogger): Boolean {
+    fun openUrl(url: String) {
+        logger.info("Opening $url")
+        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+        if (browserIntent.resolveActivity(packageManager) != null) {
+            startActivity(browserIntent)
+        }
+    }
+    if (text == null || text.isBlank()) return false
+    for (line in text.lines().asReversed()) {
+        val matcher = Patterns.WEB_URL.matcher(line)
+        if (!matcher.matches()) continue
+        openUrl(matcher.group(1))
         return true
     }
     return false

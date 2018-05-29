@@ -15,9 +15,11 @@ interface MessagesView : BaseView {
     
     fun clearInput()
     
-    fun openUrl(url: String): Boolean
+    fun openUrl(text: String): Boolean
     
     fun share(title: String, content: String): Boolean
+    
+    fun copyToClipboard(label: String, text: String)
     
     fun hasMicrophonePermission(request: Boolean = false): Boolean
     
