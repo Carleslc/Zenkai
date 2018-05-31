@@ -34,6 +34,8 @@ object DeviceSettingsSharedPreferences : DeviceSettings, AnkoLogger {
     
     override operator fun set(id: String, value: Boolean) = edit { putBoolean(id, value) }
     
+    override fun clear(id: String) = edit { remove(id) }
+    
     override fun isNetworkAvailable(): Boolean {
         fun getNetworkInfo(): NetworkInfo? {
             val manager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager

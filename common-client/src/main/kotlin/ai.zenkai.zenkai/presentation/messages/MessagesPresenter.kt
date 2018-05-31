@@ -136,6 +136,7 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter(), WithLogging b
         logger.info { "BotResult Success?" }
         if (isLoginError()) {
             tokenLoginRequest = login!! // wait for a token
+            RepositoriesProvider.getSettingsRepository().clearToken(tokenLoginRequest!!.type)
         } else if (isError()) {
             logger.error("Error ${error!!.message} with code ${error.status}")
             UI { view.showError(i18n[S.INTERNAL_ERROR]) }

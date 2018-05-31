@@ -16,6 +16,8 @@ interface DeviceSettings {
     
     operator fun set(id: String, value: Boolean)
     
+    fun clear(id: String)
+    
     fun isNetworkAvailable(): Boolean
     
 }
