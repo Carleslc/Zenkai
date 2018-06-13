@@ -116,7 +116,7 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter(), WithLogging b
         loading = true
         ServicesProvider.getSpeechService().speakerEnabled = false
         val firstTime = RepositoriesProvider.getSettingsRepository().isFirstTime()
-        view.addAll(repository.getHistory().sortedBy { it.date })
+        view.addAll(repository.getHistory())
         ServicesProvider.getSpeechService().speakerEnabled = firstTime
         val greetings = repository.greetings()
         addSay(greetings)
