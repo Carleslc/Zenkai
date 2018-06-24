@@ -11,8 +11,6 @@ interface MessagesView : BaseView {
     
     fun addAll(messages: Collection<Message>)
     
-    fun onMessageInteraction(message: Message)
-    
     fun clearInput()
     
     fun openUrl(text: String): Boolean

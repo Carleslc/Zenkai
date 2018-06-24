@@ -10,10 +10,8 @@ import ai.zenkai.zenkai.exceptions.ListeningException
 import ai.zenkai.zenkai.i18n.S
 import ai.zenkai.zenkai.i18n.i18n
 import ai.zenkai.zenkai.i18n.locale
-import ai.zenkai.zenkai.model.BotResult
-import ai.zenkai.zenkai.model.BotResult.Factory
 import ai.zenkai.zenkai.model.VoiceMessage
-import ai.zenkai.zenkai.services.bot.DialogFlowService
+import ai.zenkai.zenkai.services.bot.DialogflowService
 import ai.zenkai.zenkai.services.speech.SpeechService
 import ai.zenkai.zenkai.services.speech.SpeechService.SpeakingListener.Factory.onFinish
 import android.content.Context
@@ -158,7 +156,7 @@ object AndroidSpeechService : SpeechService(), VoiceListener, AnkoLogger {
     
     override fun onListen(callback: ListeningCallback) {
         listeningCallback = callback
-        UI.show(DialogFlowService.config as AndroidAIConfiguration, this)
+        UI.show(DialogflowService.config as AndroidAIConfiguration, this)
     }
     
     override fun onError(error: AIError) {
@@ -167,7 +165,7 @@ object AndroidSpeechService : SpeechService(), VoiceListener, AnkoLogger {
             error.message == NO_RESULT -> UI.context.toast(i18n[S.TRY_AGAIN])
             else -> {
                 UI.close()
-                val message = DialogFlowService.checkNetworkErrorMessage(error.message)
+                val message = DialogflowService.checkNetworkErrorMessage(error.message)
                 listeningCallback?.onError(ListeningException(message))
                 listeningCallback = null
             }
@@ -183,8 +181,8 @@ object AndroidSpeechService : SpeechService(), VoiceListener, AnkoLogger {
         val event = listeningCallback?.onRequest(VoiceMessage(query))
         return runBlocking {
             val result = if (event != null) {
-                DialogFlowService.sendEventForResponse(event)
-            } else DialogFlowService.ask(query, request)
+                DialogflowService.sendEventForResponse(event)
+            } else DialogflowService.ask(query, request)
             val response = result.first
             if (result.second.isError() && !result.second.isLoginError()) {
                 listeningCallback?.onError(ListeningException(result.second.error!!.message))

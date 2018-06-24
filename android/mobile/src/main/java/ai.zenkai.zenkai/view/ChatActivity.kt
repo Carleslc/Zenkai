@@ -115,10 +115,6 @@ class ChatActivity : BaseActivity(), MessagesView {
         messagesAdapter.addAll(messages)
     }
     
-    override fun onMessageInteraction(message: Message) {
-        presenter.onMessageInteraction(message)
-    }
-    
     override fun clearInput() {
         UI.text = ""
     }
@@ -137,7 +133,9 @@ class ChatActivity : BaseActivity(), MessagesView {
         info { "$label $text copied" }
     }
     
-    private fun onMessageClick(message: Message) = onMessageInteraction(message)
+    private fun onMessageClick(message: Message) {
+        presenter.onMessageInteraction(message)
+    }
     
     private fun onSend() {
         presenter.onNewMessage(TextMessage(UI.text))
