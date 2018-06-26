@@ -84,7 +84,12 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter(), WithLogging b
         if (!addCommon(result)) return
         logger.info { "[${this::class.simpleName}] Add Text" }
         UI {
-            messages.forEach { add(it) }
+            messages.forEachIndexed { i, message ->
+                if (i > 0 && i != messages.lastIndex) {
+                    delay(800)
+                }
+                add(message)
+            }
             loading = false
         }
     }
