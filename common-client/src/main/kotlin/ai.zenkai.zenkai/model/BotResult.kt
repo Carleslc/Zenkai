@@ -9,7 +9,7 @@ data class BotResult(
     val error: BotError? = null,
     val tokens: List<Token>? = null) {
     
-    val login get() = error?.login
+    val login get() = error?.requestToken
     
     fun isLoginError() = login != null
     fun isError() = error != null

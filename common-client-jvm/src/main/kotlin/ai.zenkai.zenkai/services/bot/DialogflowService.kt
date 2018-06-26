@@ -33,7 +33,7 @@ import me.carleslc.kotlin.extensions.collections.isBlank
 import me.carleslc.kotlin.extensions.collections.mapToMutableList
 import kotlin.properties.Delegates.notNull
 
-actual object DialogFlowService : BotService, WithLogging by KLoggerHolder() {
+actual object DialogflowService : BotService, WithLogging by KLoggerHolder() {
     
     private const val PARTIAL_CONTENT = 206
     private const val OK = 200
@@ -76,7 +76,7 @@ actual object DialogFlowService : BotService, WithLogging by KLoggerHolder() {
                 }
             } catch(e: Exception) {
                 val message = e.message ?: NO_NETWORK
-                logger.error { "[${DialogFlowService::class.simpleName}] Error processing Dialogflow request: ${e.message}" }
+                logger.error { "[${DialogflowService::class.simpleName}] Error processing Dialogflow request: ${e.message}" }
                 val botError = BotError(checkNetworkErrorMessage(message), 418, e.stackTrace.joinToString("\n"), null)
                 return AIResponse() to BotResult.error(botError)
             }

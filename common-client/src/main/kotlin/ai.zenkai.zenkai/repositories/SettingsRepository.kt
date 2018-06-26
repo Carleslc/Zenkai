@@ -29,6 +29,14 @@ object SettingsRepository : WithLogging by KLoggerHolder() {
         tokens[type] = update
     }
     
+    fun clearToken(type: String) {
+        logger.info { "Clear token $type" }
+        deviceSettings.clear(type + TOKEN_SUFFIX)
+        deviceSettings.clear(type + EVENT_SUFFIX)
+        deviceSettings.clear(type + REGEX_SUFFIX)
+        tokens.remove(type)
+    }
+    
     fun getTokens() = tokens.values
     
     fun setDeviceSettings(deviceSettings: DeviceSettings) {

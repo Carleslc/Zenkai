@@ -84,7 +84,12 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter(), WithLogging b
         if (!addCommon(result)) return
         logger.info { "[${this::class.simpleName}] Add Text" }
         UI {
-            messages.forEach { add(it) }
+            messages.forEachIndexed { i, message ->
+                if (i > 0 && i != messages.lastIndex) {
+                    delay(800)
+                }
+                add(message)
+            }
             loading = false
         }
     }
@@ -116,7 +121,7 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter(), WithLogging b
         loading = true
         ServicesProvider.getSpeechService().speakerEnabled = false
         val firstTime = RepositoriesProvider.getSettingsRepository().isFirstTime()
-        view.addAll(repository.getHistory().sortedBy { it.date })
+        view.addAll(repository.getHistory())
         ServicesProvider.getSpeechService().speakerEnabled = firstTime
         val greetings = repository.greetings()
         addSay(greetings)
@@ -136,6 +141,7 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter(), WithLogging b
         logger.info { "BotResult Success?" }
         if (isLoginError()) {
             tokenLoginRequest = login!! // wait for a token
+            RepositoriesProvider.getSettingsRepository().clearToken(tokenLoginRequest!!.type)
         } else if (isError()) {
             logger.error("Error ${error!!.message} with code ${error.status}")
             UI { view.showError(i18n[S.INTERNAL_ERROR]) }
