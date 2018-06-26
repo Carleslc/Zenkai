@@ -6,6 +6,7 @@ import ai.zenkai.zenkai.R.string
 import ai.zenkai.zenkai.common.AndroidPermissions
 import ai.zenkai.zenkai.common.TextMicAnimator
 import ai.zenkai.zenkai.common.extensions.hasPermission
+import ai.zenkai.zenkai.common.extensions.hideKeyboard
 import ai.zenkai.zenkai.common.extensions.openUrl
 import ai.zenkai.zenkai.common.extensions.visible
 import ai.zenkai.zenkai.common.services.speech.AndroidSpeechService
@@ -19,11 +20,14 @@ import ai.zenkai.zenkai.presentation.messages.MessagesView
 import ai.zenkai.zenkai.view.layout.ChatUI
 import ai.zenkai.zenkai.view.layout.DialogflowMicrophoneDialog
 import android.Manifest
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.os.Bundle
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.view.View
+import klogging.KLogger
 import me.carleslc.kotlin.extensions.standard.letIfTrue
 import org.jetbrains.anko.*
 import java.util.Locale
@@ -60,7 +64,7 @@ class ChatActivity : BaseActivity(), MessagesView {
         App.setLanguage(Locale.getDefault().supportedLanguage)
         fun RecyclerView.initMessages() {
             setHasFixedSize(true)
-            messagesAdapter = MessagesAdapter(attached = UI.messages, onBotMessageClick = ::onMessageClick)
+            messagesAdapter = MessagesAdapter(attached = UI.messages, onMessageClick = ::onMessageClick)
             adapter = messagesAdapter
             layoutManager = LinearLayoutManager(ctx)
             itemAnimator = DefaultItemAnimator()
@@ -94,6 +98,7 @@ class ChatActivity : BaseActivity(), MessagesView {
             firstResume = false
         }
         super.onResume()
+        messagesAdapter.scrollToBottom()
     }
     
     override fun onDestroy() {
@@ -110,22 +115,31 @@ class ChatActivity : BaseActivity(), MessagesView {
         messagesAdapter.addAll(messages)
     }
     
-    override fun onMessageInteraction(message: Message) {
-        presenter.onMessageInteraction(message)
-    }
-    
     override fun clearInput() {
         UI.text = ""
     }
     
-    override fun openUrl(url: String) = ctx.openUrl(url)
+    override fun openUrl(text: String): Boolean {
+        return ctx.openUrl(text, this)
+    }
     
     override fun share(title: String, content: String) = ctx.share(content, subject = title)
     
-    private fun onMessageClick(message: Message) = onMessageInteraction(message)
+    override fun copyToClipboard(label: String, text: String) {
+        if (UI.text.isEmpty()) UI.text = text
+        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+        clipboard?.primaryClip = ClipData.newPlainText(label, text)
+        toast(i18n[S.CLIPBOARD])
+        info { "$label $text copied" }
+    }
+    
+    private fun onMessageClick(message: Message) {
+        presenter.onMessageInteraction(message)
+    }
     
     private fun onSend() {
         presenter.onNewMessage(TextMessage(UI.text))
+        hideKeyboard(this)
     }
     
     private fun onMicrophone() {

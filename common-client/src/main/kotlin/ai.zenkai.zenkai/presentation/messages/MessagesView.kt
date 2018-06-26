@@ -11,13 +11,13 @@ interface MessagesView : BaseView {
     
     fun addAll(messages: Collection<Message>)
     
-    fun onMessageInteraction(message: Message)
-    
     fun clearInput()
     
-    fun openUrl(url: String): Boolean
+    fun openUrl(text: String): Boolean
     
     fun share(title: String, content: String): Boolean
+    
+    fun copyToClipboard(label: String, text: String)
     
     fun hasMicrophonePermission(request: Boolean = false): Boolean
     

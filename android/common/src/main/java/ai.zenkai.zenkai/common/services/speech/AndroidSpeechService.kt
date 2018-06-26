@@ -6,13 +6,12 @@ import ai.api.model.AIRequest
 import ai.api.model.AIResponse
 import ai.zenkai.zenkai.common.IdGenerator
 import ai.zenkai.zenkai.common.services.bot.AndroidAIConfiguration
-import ai.zenkai.zenkai.model.VoiceMessage
 import ai.zenkai.zenkai.exceptions.ListeningException
 import ai.zenkai.zenkai.i18n.S
 import ai.zenkai.zenkai.i18n.i18n
 import ai.zenkai.zenkai.i18n.locale
-import ai.zenkai.zenkai.services.bot.DialogFlowService
-import ai.zenkai.zenkai.services.bot.DialogFlowService.NO_NETWORK
+import ai.zenkai.zenkai.model.VoiceMessage
+import ai.zenkai.zenkai.services.bot.DialogflowService
 import ai.zenkai.zenkai.services.speech.SpeechService
 import ai.zenkai.zenkai.services.speech.SpeechService.SpeakingListener.Factory.onFinish
 import android.content.Context
@@ -36,7 +35,7 @@ object AndroidSpeechService : SpeechService(), VoiceListener, AnkoLogger {
     private val speakingMessages by lazy { mutableMapOf<String, VoiceMessage>() }
     
     private var started = false
-    private var enabledOnPause = true
+    private var speakerEnabledOnPause = true
     
     private const val NO_INPUT = "Speech recognition engine error: No speech input."
     private const val NO_RESULT = "Speech recognition engine error: No recognition result matched."
@@ -49,6 +48,12 @@ object AndroidSpeechService : SpeechService(), VoiceListener, AnkoLogger {
                 field = value
                 debug { "Speaker " + if (value) "enabled" else "disabled" }
             }
+        }
+    
+    override var microphoneEnabled: Boolean = true
+        set(value) {
+            field = value
+            debug { "Microphone " + if (value) "enabled" else "disabled" }
         }
     
     fun attach(context: Context, ui: VoiceUI): AndroidSpeechService {
@@ -101,7 +106,7 @@ object AndroidSpeechService : SpeechService(), VoiceListener, AnkoLogger {
     }
     
     override fun pause() {
-        saveSpeakerState()
+        savePauseState()
         UI.pause()
         TTS.stop()
         debug { "TTS ($language) Stopping" }
@@ -118,7 +123,7 @@ object AndroidSpeechService : SpeechService(), VoiceListener, AnkoLogger {
     }
     
     override fun resume() {
-        restoreSpeakerState()
+        restorePauseState()
         UI.resume()
         debug { "TTS ($language) Resumed" }
     }
@@ -127,17 +132,17 @@ object AndroidSpeechService : SpeechService(), VoiceListener, AnkoLogger {
         UI.close()
         TTS.shutdown()
         started = false
-        saveSpeakerState()
+        savePauseState()
         debug { "TTS ($language) Shutdown" }
     }
     
-    private fun saveSpeakerState() {
-        enabledOnPause = speakerEnabled
+    private fun savePauseState() {
+        speakerEnabledOnPause = speakerEnabled
         speakerEnabled = false
     }
     
-    private fun restoreSpeakerState() {
-        speakerEnabled = enabledOnPause
+    private fun restorePauseState() {
+        speakerEnabled = speakerEnabledOnPause
     }
     
     override fun onSpeak(message: VoiceMessage) {
@@ -151,7 +156,7 @@ object AndroidSpeechService : SpeechService(), VoiceListener, AnkoLogger {
     
     override fun onListen(callback: ListeningCallback) {
         listeningCallback = callback
-        UI.show(DialogFlowService.config as AndroidAIConfiguration, this)
+        UI.show(DialogflowService.config as AndroidAIConfiguration, this)
     }
     
     override fun onError(error: AIError) {
@@ -160,7 +165,7 @@ object AndroidSpeechService : SpeechService(), VoiceListener, AnkoLogger {
             error.message == NO_RESULT -> UI.context.toast(i18n[S.TRY_AGAIN])
             else -> {
                 UI.close()
-                val message = DialogFlowService.checkNetworkErrorMessage(error.message)
+                val message = DialogflowService.checkNetworkErrorMessage(error.message)
                 listeningCallback?.onError(ListeningException(message))
                 listeningCallback = null
             }
@@ -173,11 +178,16 @@ object AndroidSpeechService : SpeechService(), VoiceListener, AnkoLogger {
     }
     
     override fun onRequest(query: String, request: AIRequest, requestExtras: RequestExtras?): AIResponse? {
-        listeningCallback?.onRequest(VoiceMessage(query))
+        val event = listeningCallback?.onRequest(VoiceMessage(query))
         return runBlocking {
-            val result = DialogFlowService.ask(query, request)
+            val result = if (event != null) {
+                DialogflowService.sendEventForResponse(event)
+            } else DialogflowService.ask(query, request)
             val response = result.first
-            with (response.result) {
+            if (result.second.isError() && !result.second.isLoginError()) {
+                listeningCallback?.onError(ListeningException(result.second.error!!.message))
+                listeningCallback = null
+            } else with (response.result) {
                 debug { "Received response for '${response.result.resolvedQuery}' on action " +
                     "${response.result.action} with status ${response.status.code}" }
                 listeningCallback?.onResults(result.second)
@@ -199,7 +209,7 @@ object AndroidSpeechService : SpeechService(), VoiceListener, AnkoLogger {
     
     @SuppressWarnings("deprecation")
     private fun speak(message: VoiceMessage) {
-        info { "Speaking: $message" }
+        debug { "Speaking: $message" }
         val id = utteranceIds.getNextString()
         speakingMessages[id] = message
         if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {

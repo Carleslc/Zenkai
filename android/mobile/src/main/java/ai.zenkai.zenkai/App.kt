@@ -9,7 +9,7 @@ import ai.zenkai.zenkai.i18n.i18n
 import ai.zenkai.zenkai.i18n.supportedLanguage
 import ai.zenkai.zenkai.repositories.SettingsRepository
 import ai.zenkai.zenkai.services.ServicesProvider
-import ai.zenkai.zenkai.services.bot.DialogFlowService
+import ai.zenkai.zenkai.services.bot.DialogflowService
 import android.support.multidex.MultiDexApplication
 import com.jakewharton.threetenabp.AndroidThreeTen
 import org.jetbrains.anko.*
@@ -23,7 +23,7 @@ class App : MultiDexApplication() {
         UIx = AndroidUI
         AndroidThreeTen.init(ctx)
         SettingsRepository.setDeviceSettings(DeviceSettingsSharedPreferences.attach(ctx))
-        DialogFlowService.setConfigurationProvider(AndroidDialogFlowConfigurationProvider)
+        DialogflowService.setConfigurationProvider(AndroidDialogFlowConfigurationProvider)
         ServicesProvider.setSpeechService(AndroidSpeechService)
         setLanguage(Locale.getDefault().supportedLanguage)
     }

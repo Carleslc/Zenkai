@@ -13,7 +13,7 @@ import android.widget.TextView
 import org.jetbrains.anko.sdk19.coroutines.*
 
 class MessagesAdapter(initialMessages: List<Message> = listOf(), private val attached: RecyclerView,
-    private val onBotMessageClick: (Message) -> Unit) : RecyclerView.Adapter<MessagesAdapter.ViewHolder>() {
+    private val onMessageClick: (Message) -> Unit) : RecyclerView.Adapter<MessagesAdapter.ViewHolder>() {
 
     private val messages = initialMessages.toMutableList()
     
@@ -21,18 +21,19 @@ class MessagesAdapter(initialMessages: List<Message> = listOf(), private val att
 
     fun add(message: Message) {
         messages.add(message)
-        val end = itemCount - 1
-        attached.scrollToPosition(end)
-        notifyItemInserted(end)
+        scrollToBottom()
+        notifyItemInserted(itemCount - 1)
     }
     
     fun addAll(newMessages: Collection<Message>) {
         val start = itemCount
         val count = newMessages.size
         messages.addAll(newMessages)
-        attached.scrollToPosition(messages.size)
         notifyItemRangeInserted(start, count)
+        scrollToBottom()
     }
+    
+    fun scrollToBottom() = attached.scrollToPosition(itemCount - 1)
     
     override fun getItemId(position: Int) = position.toLong()
     
@@ -41,11 +42,11 @@ class MessagesAdapter(initialMessages: List<Message> = listOf(), private val att
     override fun getItemCount() = messages.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-        ViewHolder(parent.inflate(R.layout.message), onBotMessageClick)
+        ViewHolder(parent.inflate(R.layout.message), onMessageClick)
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(messages[position])
 
-    class ViewHolder(itemView: View, private val onBotMessageClick: (Message) -> Unit)
+    class ViewHolder(itemView: View, private val onMessageClick: (Message) -> Unit)
         : RecyclerView.ViewHolder(itemView) {
     
         private val botText: TextView by bindView(R.id.botText)
@@ -54,10 +55,11 @@ class MessagesAdapter(initialMessages: List<Message> = listOf(), private val att
         fun bind(message: Message) {
             if (message is BotMessage) {
                 botText.text = message.message
-                botText.onClick { onBotMessageClick(message) }
+                botText.onClick { onMessageClick(message) }
                 userText.visible = false
             } else {
                 userText.text = message.message
+                userText.onClick { onMessageClick(message) }
                 botText.visible = false
             }
         }
