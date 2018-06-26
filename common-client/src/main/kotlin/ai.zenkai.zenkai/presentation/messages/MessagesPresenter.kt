@@ -85,7 +85,7 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter(), WithLogging b
         logger.info { "[${this::class.simpleName}] Add Text" }
         UI {
             messages.forEachIndexed { i, message ->
-                if (i > 0 && i != messages.lastIndex) {
+                if (i > 0) {
                     delay(800)
                 }
                 add(message)
@@ -109,6 +109,7 @@ class MessagesPresenter(val view: MessagesView) : BasePresenter(), WithLogging b
                 !is BotMessage -> TextMessage(message.message.capitalize())
                 else -> message
             }
+            logger.info { "Show message '${message.message}'" }
             view.add(uiMessage)
         }
         if (!message.isEmpty()) {
