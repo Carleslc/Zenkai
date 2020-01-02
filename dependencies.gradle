@@ -1,6 +1,6 @@
 ext {
     // Common
-    klogging_version = '1.2.30'
+    klogging_version = '1.2.10'
     coroutines_version = '0.22.5'
     simple_yaml_version = '1.2'
 
@@ -44,7 +44,7 @@ ext {
             kotlin_test_common         : ["org.jetbrains.kotlin:kotlin-test-common:$kotlin_version",
                                           "org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlin_version"],
             kotlin_extensions          : "com.github.carleslc:kotlin-extensions:$kotlin_extensions_version",
-            klogging_common            : "com.github.lewik.klogging:klogging.common:$klogging_version",
+            klogging_common            : "com.github.shafirov.klogging:klogging.common:$klogging_version",
             simple_yaml                : "com.github.carleslc:simple-yaml:$simple_yaml_version",
 
             // JVM
@@ -60,7 +60,7 @@ ext {
                                           "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"],
             kotlin_serialization_jvm   : "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serialization_version",
             coroutines_jvm             : "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version",
-            klogging_jvm               : ["com.github.lewik.klogging:klogging.jvm:$klogging_version",
+            klogging_jvm               : ["com.github.shafirov.klogging:klogging.jvm:$klogging_version",
                                           "org.slf4j:slf4j-android:$sl4j_version"],
             datetime_jvm               : "com.jakewharton.threetenabp:threetenabp:$datetime_version",
             prettytime                 : "org.ocpsoft.prettytime:prettytime:$prettytime_version",
